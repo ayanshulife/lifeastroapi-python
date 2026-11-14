@@ -1,0 +1,109 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lifeastroapi"
+version = "0.1.0"
+description = "Official Python SDK for LifeAstroAPI: Vedic astrology and Hindu calendar API (panchang, festivals, kundli, dasha, kundli matching, muhurat, horoscopes, numerology, tarot, Western astrology) in 10 languages."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Ayanshu Life", email = "support@lifeastroapi.com" }]
+requires-python = ">=3.9"
+dependencies = ["httpx>=0.23,<1"]
+keywords = [
+  "astrology",
+  "vedic-astrology",
+  "jyotish",
+  "panchang",
+  "kundli",
+  "kundli-matching",
+  "horoscope",
+  "hindu-calendar",
+  "festivals",
+  "muhurat",
+  "numerology",
+  "tarot",
+  "western-astrology",
+  "astrology-api",
+  "lifeastroapi",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://lifeastroapi.com"
+Documentation = "https://lifeastroapi.com/docs/"
+Repository = "https://github.com/ayanshulife/lifeastroapi-python"
+Issues = "https://github.com/ayanshulife/lifeastroapi-python/issues"
+Changelog = "https://github.com/ayanshulife/lifeastroapi-python/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "mypy>=1.10,<2", "ruff>=0.6", "build>=1.2", "twine>=5"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lifeastroapi"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/lifeastroapi",
+  "tests",
+  "examples",
+  "scripts",
+  "README.md",
+  "CHANGELOG.md",
+  "LICENSE",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+# `mypy` checks the package, scripts and examples against Python 3.9 (the oldest
+# supported). The tests use pytest 9, which itself needs 3.10:
+# `mypy --python-version 3.10 tests`.
+[tool.mypy]
+python_version = "3.9"
+strict = true
+files = ["src/lifeastroapi", "scripts", "examples"]
+mypy_path = "scripts"
+
+# anyio (used inside httpx) is written for newer Pythons; checking this package
+# against 3.9 must not parse it.
+[[tool.mypy.overrides]]
+module = ["anyio", "anyio.*"]
+follow_imports = "skip"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = [
+  "RUF001", # Devanagari and other Indic text in docstrings and examples is intended
+  "RUF002",
+  "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"] # table-style test cases read better on one line
+
+[tool.ruff.lint.isort]
+known-first-party = ["lifeastroapi"]
+known-local-folder = ["conftest", "samples"]

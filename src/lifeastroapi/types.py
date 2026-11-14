@@ -1,0 +1,81 @@
+"""Shared input and option types.
+
+Responses are returned as parsed JSON (``dict`` / ``list``) and typed ``Any``:
+the API has hundreds of response shapes and they evolve on their own schedule.
+"""
+
+from __future__ import annotations
+
+from typing import Literal, TypedDict, Union
+
+#: Response language, passed as ``lang`` on Vedic methods.
+#:
+#: - Complete: ``en`` (default), ``hi``, ``mr``, ``gu``, ``bn``, ``te``, ``ta``, ``kn``, ``ml``.
+#:   Names, terms and prose come back in the language.
+#: - ``pa``: names and terms only; longer prose is still English.
+#:
+#: Ids, dates, numbers and explicit ``*_en`` / ``*_hi`` fields stay as they are in
+#: every language. Western, tarot, geo and meta methods answer in English.
+Locale = Literal["en", "hi", "mr", "gu", "bn", "te", "ta", "kn", "ml", "pa"]
+
+#: Every value of :data:`Locale`, in the order of the README table.
+LOCALES: tuple[Locale, ...] = ("en", "hi", "mr", "gu", "bn", "te", "ta", "kn", "ml", "pa")
+
+#: Sidereal ayanamsa systems supported by the API (``lahiri`` is the default).
+Ayanamsa = Literal["lahiri", "krishnamurti", "raman", "fagan", "yukteshwar", "true_chitrapaksha"]
+
+#: House systems supported by the API.
+HouseSystem = Literal[
+    "whole-sign", "equal", "placidus", "koch", "porphyry", "campanus", "regiomontanus"
+]
+
+
+class BirthInput(TypedDict):
+    """A birth (or event) moment at a place.
+
+    Used for ``boy`` / ``girl`` (kundli matching), ``person_a`` / ``person_b``
+    (Western pairs) and ``birth`` (natal chart + transit moment).
+    """
+
+    date: str
+    """ISO date, ``YYYY-MM-DD``."""
+    time: str
+    """24-hour time, ``HH:MM``."""
+    tz: str
+    """IANA name (``Asia/Kolkata``) or fixed offset (``+05:30``)."""
+    lat: float
+    """Latitude in decimal degrees, north positive."""
+    lon: float
+    """Longitude in decimal degrees, east positive."""
+
+
+class _NatalWindowBirthRequired(TypedDict):
+    date: str
+    time: str
+    tz: str
+
+
+class NatalWindowBirth(_NatalWindowBirthRequired, total=False):
+    """Natal chart for the window endpoints (``transit.windows``, ``transit.sade_sati_windows``).
+
+    Only ``date``, ``time`` and ``tz`` are needed for the natal Moon; ``lat`` and
+    ``lon`` add the lagna-based fields where an endpoint has them.
+    """
+
+    lat: float
+    lon: float
+
+
+class RequestOptions(TypedDict, total=False):
+    """Per-call options, passed as ``request_options=`` to any method."""
+
+    timeout: float
+    """Override the client timeout for this call, in seconds."""
+    raw: bool
+    """Return the body exactly as received, without unwrapping a ``{data, meta}`` envelope."""
+
+
+#: A query value. ``None`` and ``""`` are left out of the request.
+QueryValue = Union[str, int, float, bool, None]
+#: Query parameters by wire name (``birth.date``, ``boy.lat``, ``start_date``, ...).
+QueryParams = dict[str, QueryValue]
