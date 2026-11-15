@@ -6,7 +6,7 @@ kundli, kundli matching, muhurat, dashas, horoscopes, numerology, tarot and West
 location-aware calculations and pay-per-call billing. Free tier: 1,500 credits a month, no card.
 [Get a key](https://lifeastroapi.com/signup/).
 
-- **Every endpoint**: 322 methods across 23 resource groups (panchang, chart, dasha, milan,
+- **Every endpoint**: all 321 endpoints (322 methods, with a shortcut for the navamsa chart) across 23 resource groups (panchang, chart, dasha, milan,
   transit, horoscope, numerology, muhurta, reports, narrative, remedies, a complete Western
   module and more). Same methods as the official Node.js SDK, generated from the same manifest.
 - **Sync and async**: `LifeAstro` and `AsyncLifeAstro`, both on [httpx](https://www.python-httpx.org/),
