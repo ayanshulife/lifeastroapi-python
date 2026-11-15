@@ -21,7 +21,9 @@ from lifeastroapi import (
     NotFoundError,
     PaymentRequiredError,
     PermissionDeniedError,
+    RateLimit,
     RateLimitError,
+    ResponseInfo,
     ServerError,
     __version__,
 )
@@ -884,3 +886,111 @@ def test_ayanamsa_on_calendar_and_planet_moments() -> None:
     )
     assert rec.params(0)["ayanamsa"] == "raman"
     assert rec.params(1)["ayanamsa"] == "krishnamurti"
+
+
+# ---------------------------------------------------------------------------
+# on_response (credits, rate limit, request id)
+# ---------------------------------------------------------------------------
+RESPONSE_HEADERS = {
+    "X-Request-ID": "52a520f261d3db37",
+    "X-Credits-Remaining": "64043",
+    "X-RateLimit-Limit": "250",
+    "X-RateLimit-Remaining": "249",
+    "X-RateLimit-Reset": "1794718800",
+    "X-Cache": "HIT",
+    "Content-Language": "gu",
+}
+FULL_INFO = ResponseInfo(
+    status=200,
+    path="/v1/panchang/basic",
+    request_id="52a520f261d3db37",
+    credits_remaining=64043,
+    rate_limit=RateLimit(
+        limit=250, remaining=249, reset_at=datetime.fromtimestamp(1794718800, tz=timezone.utc)
+    ),
+    cache="HIT",
+    language="gu",
+)
+
+
+def test_on_response_reports_every_header_client_level_and_per_call() -> None:
+    rec = Recorder(lambda _r: reply({"ok": 1}, headers=RESPONSE_HEADERS))
+    seen: list[ResponseInfo] = []
+    per_call: list[ResponseInfo] = []
+    order: list[str] = []
+
+    def client_hook(info: ResponseInfo) -> None:
+        seen.append(info)
+        order.append("client")
+
+    def call_hook(info: ResponseInfo) -> None:
+        per_call.append(info)
+        order.append("call")
+
+    client = make_client(rec, on_response=client_hook)
+    client.panchang.basic(
+        lat=1, lon=2, tz="UTC", lang="gu", request_options={"on_response": call_hook}
+    )
+    assert seen == [FULL_INFO]
+    assert per_call == seen
+    assert order == ["client", "call"]
+    assert seen[0].rate_limit is not None
+    assert seen[0].rate_limit.reset_at.tzinfo == timezone.utc
+
+
+def test_on_response_leaves_out_headers_the_api_did_not_send() -> None:
+    # Free calls have no credits header; a non-numeric value or an incomplete
+    # rate-limit set is left out too.
+    headers = {
+        "x-request-id": "abc",
+        "x-credits-remaining": "n/a",
+        "x-ratelimit-limit": "250",
+        "x-ratelimit-remaining": "249",
+    }
+    rec = Recorder(lambda _r: reply({"ok": 1}, headers=headers))
+    seen: list[ResponseInfo] = []
+    make_client(rec, on_response=seen.append).meta.version()
+    assert seen == [ResponseInfo(status=200, path="/v1/meta/version", request_id="abc")]
+
+
+def test_on_response_reports_the_final_error_once_not_the_retried_attempts() -> None:
+    calls = {"n": 0}
+
+    def unavailable(_r: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        body = {"error": {"code": "billing_unavailable", "message": "x"}}
+        return reply(body, 503, {"x-request-id": f"r{calls['n']}", "retry-after": "0"})
+
+    seen: list[ResponseInfo] = []
+    client = make_client(Recorder(unavailable), max_retries=2, on_response=seen.append)
+    with pytest.raises(ServerError):
+        client.meta.version()
+    assert calls["n"] == 3
+    assert [(i.status, i.request_id) for i in seen] == [(503, "r3")]
+
+
+def test_on_response_is_not_called_for_a_network_failure() -> None:
+    # The 503 was retried and the retry failed without a response: nothing to report.
+    calls = {"n": 0}
+
+    def flaky(request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return reply({"error": {"code": "unavailable"}}, 503, {"x-request-id": "r1"})
+        raise httpx.ConnectError("boom", request=request)
+
+    seen: list[ResponseInfo] = []
+    client = make_client(Recorder(flaky), max_retries=1, on_response=seen.append)
+    with pytest.raises(LifeAstroConnectionError):
+        client.meta.version()
+    assert calls["n"] == 2
+    assert seen == []
+
+
+def test_a_raising_on_response_hook_never_breaks_the_call() -> None:
+    def broken(_info: ResponseInfo) -> None:
+        raise RuntimeError("logger down")
+
+    rec = Recorder(lambda _r: reply({"v": 7}, headers=RESPONSE_HEADERS))
+    client = make_client(rec, on_response=broken)
+    assert client.meta.version(request_options={"on_response": broken}) == {"v": 7}

@@ -15,7 +15,7 @@ from ._http import AsyncTransport, Config, SyncTransport
 from ._version import __version__
 from .errors import LifeAstroError
 from .resources import AsyncResources, Resources
-from .types import QueryValue, RequestOptions
+from .types import QueryValue, RequestOptions, ResponseHook
 
 DEFAULT_BASE_URL = "https://api.lifeastroapi.com"
 API_KEY_ENV = "LIFEASTRO_API_KEY"
@@ -27,6 +27,7 @@ def _resolve_config(
     timeout: float,
     max_retries: int,
     default_headers: Mapping[str, str] | None,
+    on_response: ResponseHook | None,
 ) -> Config:
     key = api_key if api_key is not None else os.environ.get(API_KEY_ENV)
     if not key:
@@ -43,6 +44,7 @@ def _resolve_config(
         max_retries=max(0, int(max_retries)),
         user_agent=f"lifeastroapi-python/{__version__}",
         default_headers=dict(default_headers or {}),
+        on_response=on_response,
     )
 
 
@@ -58,6 +60,9 @@ class LifeAstro(Resources):
         default_headers: Extra headers sent on every request.
         http_client: Your own ``httpx.Client`` (proxies, custom transport, tests).
             The SDK does not close a client you pass in.
+        on_response: Called with the :class:`~lifeastroapi.ResponseInfo` of every call:
+            request id, credits left, rate limit, cache and language. Use it to log
+            usage or warn when credits run low. Exceptions raised inside it are ignored.
 
     Example::
 
@@ -79,8 +84,11 @@ class LifeAstro(Resources):
         max_retries: int = 2,
         default_headers: Mapping[str, str] | None = None,
         http_client: httpx.Client | None = None,
+        on_response: ResponseHook | None = None,
     ) -> None:
-        config = _resolve_config(api_key, base_url, timeout, max_retries, default_headers)
+        config = _resolve_config(
+            api_key, base_url, timeout, max_retries, default_headers, on_response
+        )
         self._transport = SyncTransport(config, http_client)
         super().__init__(self)
 
@@ -144,6 +152,8 @@ class AsyncLifeAstro(AsyncResources):
         default_headers: Extra headers sent on every request.
         http_client: Your own ``httpx.AsyncClient``. The SDK does not close a
             client you pass in.
+        on_response: Called with the :class:`~lifeastroapi.ResponseInfo` of every call
+            (a plain function, not a coroutine). Exceptions raised inside it are ignored.
 
     Example::
 
@@ -166,8 +176,11 @@ class AsyncLifeAstro(AsyncResources):
         max_retries: int = 2,
         default_headers: Mapping[str, str] | None = None,
         http_client: httpx.AsyncClient | None = None,
+        on_response: ResponseHook | None = None,
     ) -> None:
-        config = _resolve_config(api_key, base_url, timeout, max_retries, default_headers)
+        config = _resolve_config(
+            api_key, base_url, timeout, max_retries, default_headers, on_response
+        )
         self._transport = AsyncTransport(config, http_client)
         super().__init__(self)
 

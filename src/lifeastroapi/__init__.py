@@ -31,7 +31,10 @@ from .types import (
     NatalWindowBirth,
     QueryParams,
     QueryValue,
+    RateLimit,
     RequestOptions,
+    ResponseHook,
+    ResponseInfo,
 )
 
 __all__ = [
@@ -55,8 +58,11 @@ __all__ = [
     "PermissionDeniedError",
     "QueryParams",
     "QueryValue",
+    "RateLimit",
     "RateLimitError",
     "RequestOptions",
+    "ResponseHook",
+    "ResponseInfo",
     "ServerError",
     "__version__",
 ]

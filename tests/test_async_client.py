@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable
+from datetime import datetime, timezone
 from typing import Any, Callable, TypeVar
 
 import httpx
@@ -18,6 +19,7 @@ from lifeastroapi import (
     LifeAstroTimeoutError,
     PaymentRequiredError,
     RateLimitError,
+    ResponseInfo,
     ServerError,
     __version__,
 )
@@ -168,3 +170,69 @@ def test_reads_the_api_key_from_the_environment(monkeypatch: pytest.MonkeyPatch)
 def test_raises_when_no_api_key_is_provided() -> None:
     with pytest.raises(LifeAstroError, match="API key"):
         AsyncLifeAstro()
+
+
+def test_on_response_client_level_and_per_call() -> None:
+    headers = {
+        "X-Request-ID": "52a520f261d3db37",
+        "X-Credits-Remaining": "64043",
+        "X-RateLimit-Limit": "250",
+        "X-RateLimit-Remaining": "249",
+        "X-RateLimit-Reset": "1794718800",
+        "X-Cache": "HIT",
+        "Content-Language": "bn",
+    }
+    rec = Recorder(lambda _r: reply({"ok": 1}, headers=headers))
+    seen: list[ResponseInfo] = []
+    per_call: list[ResponseInfo] = []
+
+    async def go() -> None:
+        client = make_async_client(rec, on_response=seen.append)
+        await client.panchang.basic(
+            lat=1, lon=2, tz="UTC", lang="bn", request_options={"on_response": per_call.append}
+        )
+
+    run(go)
+    assert per_call == seen
+    assert len(seen) == 1
+    info = seen[0]
+    assert (info.status, info.path, info.request_id) == (
+        200,
+        "/v1/panchang/basic",
+        "52a520f261d3db37",
+    )
+    assert (info.credits_remaining, info.cache, info.language) == (64043, "HIT", "bn")
+    assert info.rate_limit is not None
+    assert (info.rate_limit.limit, info.rate_limit.remaining) == (250, 249)
+    assert info.rate_limit.reset_at == datetime.fromtimestamp(1794718800, tz=timezone.utc)
+
+
+def test_on_response_leaves_out_missing_headers() -> None:
+    rec = Recorder(lambda _r: reply({"ok": 1}, headers={"x-request-id": "abc"}))
+    seen: list[ResponseInfo] = []
+    run(lambda: make_async_client(rec, on_response=seen.append).meta.version())
+    assert seen == [ResponseInfo(status=200, path="/v1/meta/version", request_id="abc")]
+
+
+def test_on_response_reports_the_final_error_once() -> None:
+    calls = {"n": 0}
+
+    def unavailable(_r: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        return reply({"error": {"code": "x"}}, 503, {"x-request-id": f"r{calls['n']}"})
+
+    seen: list[ResponseInfo] = []
+    client = make_async_client(Recorder(unavailable), max_retries=2, on_response=seen.append)
+    with pytest.raises(ServerError):
+        run(lambda: client.meta.version())
+    assert calls["n"] == 3
+    assert [(i.status, i.request_id) for i in seen] == [(503, "r3")]
+
+
+def test_a_raising_on_response_hook_never_breaks_the_call() -> None:
+    def broken(_info: ResponseInfo) -> None:
+        raise RuntimeError("logger down")
+
+    rec = Recorder(lambda _r: reply({"v": 7}))
+    client = make_async_client(rec, on_response=broken)
+    assert run(lambda: client.meta.version(request_options={"on_response": broken})) == {"v": 7}

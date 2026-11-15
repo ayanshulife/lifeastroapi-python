@@ -1,11 +1,13 @@
 """HTTP transport: URL and query building, bearer auth, timeout, envelope
-unwrapping, typed errors, and bounded retries with exponential backoff that
-honour ``Retry-After``. Same behaviour as the Node SDK's ``src/http.ts``.
+unwrapping, typed errors, bounded retries with exponential backoff that
+honour ``Retry-After``, and the ``on_response`` hook. Same behaviour as the Node
+SDK's ``src/http.ts``.
 """
 
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import math
 import random
@@ -26,7 +28,7 @@ from .errors import (
     LifeAstroTimeoutError,
     error_from_response,
 )
-from .types import QueryValue, RequestOptions
+from .types import QueryValue, RateLimit, RequestOptions, ResponseHook, ResponseInfo
 
 RETRYABLE_STATUS = frozenset({408, 425, 429, 500, 502, 503, 504})
 
@@ -41,6 +43,7 @@ class Config:
     max_retries: int
     user_agent: str
     default_headers: Mapping[str, str]
+    on_response: ResponseHook | None = None
 
 
 def encode_query(params: Mapping[str, QueryValue] | None) -> str:
@@ -56,8 +59,12 @@ def encode_query(params: Mapping[str, QueryValue] | None) -> str:
     return "?" + urlencode(pairs) if pairs else ""
 
 
+def _normalize_path(path: str) -> str:
+    return path if path.startswith("/") else "/" + path
+
+
 def build_url(config: Config, path: str, query: Mapping[str, QueryValue] | None) -> str:
-    return config.base_url + (path if path.startswith("/") else "/" + path) + encode_query(query)
+    return config.base_url + _normalize_path(path) + encode_query(query)
 
 
 def build_headers(config: Config) -> dict[str, str]:
@@ -102,6 +109,54 @@ def backoff_seconds(attempt: int, retry_after: float | None = None) -> float:
     if retry_after is not None:
         return min(retry_after, 30.0)
     return min(0.5 * 2.0**attempt, 8.0) + random.uniform(0, 0.25)
+
+
+def _header_int(headers: httpx.Headers, name: str) -> int | None:
+    value = headers.get(name)
+    if value is None:
+        return None
+    try:
+        return int(value.strip())
+    except ValueError:
+        return None
+
+
+def response_info(response: httpx.Response, path: str) -> ResponseInfo:
+    """Read the :class:`ResponseInfo` of a response. Header names are case-insensitive;
+    a header that is missing or not a number leaves its field ``None``."""
+    headers = response.headers
+    rate_limit: RateLimit | None = None
+    limit = _header_int(headers, "x-ratelimit-limit")
+    remaining = _header_int(headers, "x-ratelimit-remaining")
+    reset = _header_int(headers, "x-ratelimit-reset")
+    if limit is not None and remaining is not None and reset is not None:
+        with contextlib.suppress(OverflowError, OSError, ValueError):
+            rate_limit = RateLimit(
+                limit=limit,
+                remaining=remaining,
+                reset_at=datetime.fromtimestamp(reset, tz=timezone.utc),
+            )
+    return ResponseInfo(
+        status=response.status_code,
+        path=_normalize_path(path),
+        request_id=headers.get("x-request-id") or None,
+        credits_remaining=_header_int(headers, "x-credits-remaining"),
+        rate_limit=rate_limit,
+        cache=headers.get("x-cache") or None,
+        language=headers.get("content-language") or None,
+    )
+
+
+def _emit(config: Config, opts: RequestOptions, response: httpx.Response, path: str) -> None:
+    """Call the client-level hook, then the per-call one. A hook that raises never
+    breaks the call."""
+    hooks = [hook for hook in (config.on_response, opts.get("on_response")) if hook is not None]
+    if not hooks:
+        return
+    info = response_info(response, path)
+    for hook in hooks:
+        with contextlib.suppress(Exception):
+            hook(info)
 
 
 def _parse_body(content: bytes) -> Any:
@@ -156,6 +211,7 @@ class SyncTransport:
         attempt = 0
         while True:
             retry_after: float | None = None
+            answered: httpx.Response | None = None  # an HTTP response, not a network failure
             try:
                 response = self._http.request("GET", url, headers=headers, timeout=timeout)
             except httpx.RequestError as exc:
@@ -163,10 +219,14 @@ class SyncTransport:
             else:
                 body = _parse_body(response.content)
                 if 200 <= response.status_code < 300:
+                    _emit(self.config, opts, response, path)
                     return _success(body, opts.get("raw", False))
+                answered = response
                 retry_after = parse_retry_after(response.headers.get("retry-after"))
                 err = error_from_response(response.status_code, body, retry_after)
             if attempt >= self.config.max_retries or not _retryable(err):
+                if answered is not None:
+                    _emit(self.config, opts, answered, path)
                 raise err
             time.sleep(backoff_seconds(attempt, retry_after))
             attempt += 1
@@ -197,6 +257,7 @@ class AsyncTransport:
         attempt = 0
         while True:
             retry_after: float | None = None
+            answered: httpx.Response | None = None  # an HTTP response, not a network failure
             try:
                 response = await self._http.request("GET", url, headers=headers, timeout=timeout)
             except httpx.RequestError as exc:
@@ -204,10 +265,14 @@ class AsyncTransport:
             else:
                 body = _parse_body(response.content)
                 if 200 <= response.status_code < 300:
+                    _emit(self.config, opts, response, path)
                     return _success(body, opts.get("raw", False))
+                answered = response
                 retry_after = parse_retry_after(response.headers.get("retry-after"))
                 err = error_from_response(response.status_code, body, retry_after)
             if attempt >= self.config.max_retries or not _retryable(err):
+                if answered is not None:
+                    _emit(self.config, opts, answered, path)
                 raise err
             await asyncio.sleep(backoff_seconds(attempt, retry_after))
             attempt += 1

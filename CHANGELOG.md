@@ -23,6 +23,11 @@ First release of the official Python SDK.
   `LifeAstroTimeoutError`.
 - Automatic retries with exponential backoff on 429, 5xx, network errors and timeouts,
   honouring `Retry-After`; per-call `request_options={"timeout": ..., "raw": ...}`.
+- `on_response` hook, as a client argument and per call (`request_options={"on_response": ...}`):
+  receives a `ResponseInfo` with the request id, `credits_remaining`, the rate limit
+  (`RateLimit(limit, remaining, reset_at)`), the cache result and the answer's language for every
+  call, success or error. Exported `ResponseInfo`, `RateLimit` and `ResponseHook`. See "Credits,
+  rate limit and request id" in the README. Same as the Node SDK 0.10.0 `onResponse`.
 - `client.request(path, query)` / `client.get(...)` to call any `/v1/*` endpoint directly.
 - Responses are the parsed JSON (`dict` / `list`). Full type hints, `py.typed`, checked with
   `mypy --strict`. Every method's docstring has the endpoint description, credit cost and path.

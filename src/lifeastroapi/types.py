@@ -1,4 +1,4 @@
-"""Shared input and option types.
+"""Shared input and option types, and the :class:`ResponseInfo` passed to ``on_response``.
 
 Responses are returned as parsed JSON (``dict`` / ``list``) and typed ``Any``:
 the API has hundreds of response shapes and they evolve on their own schedule.
@@ -6,7 +6,9 @@ the API has hundreds of response shapes and they evolve on their own schedule.
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict, Union
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Callable, Literal, TypedDict, Union
 
 #: Response language, passed as ``lang`` on Vedic methods.
 #:
@@ -66,6 +68,49 @@ class NatalWindowBirth(_NatalWindowBirthRequired, total=False):
     lon: float
 
 
+@dataclass(frozen=True)
+class RateLimit:
+    """Your plan's per-minute rate limit, from the ``X-RateLimit-*`` headers."""
+
+    limit: int
+    """``X-RateLimit-Limit``: requests per minute for your plan."""
+    remaining: int
+    """``X-RateLimit-Remaining``: requests left in the current window."""
+    reset_at: datetime
+    """``X-RateLimit-Reset``: when the window resets (timezone-aware, UTC)."""
+
+
+@dataclass(frozen=True)
+class ResponseInfo:
+    """What the API reported about one call besides its body.
+
+    Passed to ``on_response`` (client argument or per call) for every final HTTP
+    response, success or error; not for network failures or for attempts that were
+    retried. A field is ``None`` when the API did not send its header.
+    """
+
+    status: int
+    """HTTP status of the response."""
+    path: str
+    """Request path, e.g. ``/v1/panchang/basic``."""
+    request_id: str | None = None
+    """``X-Request-ID``. Quote it to support."""
+    credits_remaining: int | None = None
+    """``X-Credits-Remaining``: the balance after this call (unchanged after a failed call).
+    ``None`` on free-tier accounts, whose allowance is not a balance, and on calls that cost
+    nothing."""
+    rate_limit: RateLimit | None = None
+    """``X-RateLimit-*``: set only when all three headers are present and numeric."""
+    cache: str | None = None
+    """``X-Cache``, e.g. ``HIT`` when the API answered from its cache (billed the same)."""
+    language: str | None = None
+    """``Content-Language``: the language the answer is in."""
+
+
+#: Receives the :class:`ResponseInfo` of each call. Exceptions raised inside it are ignored.
+ResponseHook = Callable[[ResponseInfo], None]
+
+
 class RequestOptions(TypedDict, total=False):
     """Per-call options, passed as ``request_options=`` to any method."""
 
@@ -73,6 +118,8 @@ class RequestOptions(TypedDict, total=False):
     """Override the client timeout for this call, in seconds."""
     raw: bool
     """Return the body exactly as received, without unwrapping a ``{data, meta}`` envelope."""
+    on_response: ResponseHook
+    """Called with this call's :class:`ResponseInfo` (after the client-level ``on_response``)."""
 
 
 #: A query value. ``None`` and ``""`` are left out of the request.

@@ -122,6 +122,7 @@ client = LifeAstro(
     max_retries=2,  # retries on 429 / 5xx / network errors (default 2)
     default_headers={"X-Request-Source": "my-app"},  # extra headers on every request
     http_client=httpx.Client(proxy="http://proxy:3128"),  # optional; your own httpx client
+    on_response=None,  # optional; see "Credits, rate limit and request id"
 )
 ```
 
@@ -330,7 +331,53 @@ client.chart.planets(**arjun, request_options={"timeout": 5})
 client.request("/v1/panchang/tithi", {...}, request_options={"raw": True})
 ```
 
-`timeout` overrides the client timeout for one call; `raw` returns the body exactly as received.
+`timeout` overrides the client timeout for one call; `raw` returns the body exactly as received;
+`on_response` is the hook below, for one call.
+
+## Credits, rate limit and request id
+
+Every response carries your credit balance, your plan's rate limit and a request id in its
+headers. `on_response` hands them to you as a `ResponseInfo`, for every call (client argument)
+or for one call (`request_options`):
+
+```python
+from lifeastroapi import LifeAstro, ResponseInfo
+
+
+def warn_when_low(info: ResponseInfo) -> None:
+    if info.credits_remaining is not None and info.credits_remaining < 5_000:
+        print(f"LifeAstroAPI credits low: {info.credits_remaining}")
+
+
+client = LifeAstro(on_response=warn_when_low)
+
+client.panchang.basic(
+    lat=19.076,
+    lon=72.8777,
+    tz="Asia/Kolkata",
+    request_options={
+        "on_response": lambda info: print(
+            info.request_id, info.rate_limit.remaining if info.rate_limit else None
+        )
+    },
+)
+```
+
+| Field | From header | Meaning |
+|---|---|---|
+| `status` | | HTTP status |
+| `path` | | Endpoint path, e.g. `/v1/panchang/basic` |
+| `request_id` | `X-Request-ID` | Quote it to support |
+| `credits_remaining` | `X-Credits-Remaining` | Balance after the call; unchanged after a failed call (failed calls are free). `None` on the free tier, whose allowance is daily/monthly rather than a balance |
+| `rate_limit` | `X-RateLimit-*` | `RateLimit(limit, remaining, reset_at)` per minute for your plan; `reset_at` is a UTC `datetime` |
+| `cache` | `X-Cache` | `HIT` when the API answered from its cache (billed the same) |
+| `language` | `Content-Language` | Language of the answer |
+
+A field is `None` when the API did not send its header. `ResponseInfo` and `RateLimit` are frozen
+dataclasses. The hook runs once per call with the final response, success or error (not for
+retried attempts or network failures); the client-level hook runs first, then the per-call one.
+An exception raised inside it is ignored, so logging can never break a call. `AsyncLifeAstro`
+takes the same `on_response`, a plain function (not a coroutine).
 
 ## Escape hatch
 
