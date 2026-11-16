@@ -108,6 +108,41 @@ class Prashna:
         put(_q, "locale", lang)
         return self._c.request("/v1/prashna/chart", _q, request_options=request_options)
 
+    def kp_horary(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        number: int,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """KP horary chart for a number from 1 to 249 (30 credits), cast for the moment and place of
+        judgement: the horary ascendant (the first degree of that number's sign/star/sub part),
+        the 12 Placidus cusps with star, sub and sub-sub lords and significators, planets with KP
+        lords and houses, planet significators, the 4-step chain and the ruling planets of the
+        moment. Uses the Krishnamurti ayanamsa unless ayanamsa is sent.
+
+        Cost: 30 credits per call.
+
+        ``GET /v1/prashna/kp-horary``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "number", number)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/prashna/kp-horary", _q, request_options=request_options)
+
     def lagna_lord(
         self,
         *,
@@ -269,6 +304,41 @@ class AsyncPrashna:
         put(_q, "lang", lang)
         put(_q, "locale", lang)
         return await self._c.request("/v1/prashna/chart", _q, request_options=request_options)
+
+    async def kp_horary(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        number: int,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """KP horary chart for a number from 1 to 249 (30 credits), cast for the moment and place of
+        judgement: the horary ascendant (the first degree of that number's sign/star/sub part),
+        the 12 Placidus cusps with star, sub and sub-sub lords and significators, planets with KP
+        lords and houses, planet significators, the 4-step chain and the ruling planets of the
+        moment. Uses the Krishnamurti ayanamsa unless ayanamsa is sent.
+
+        Cost: 30 credits per call.
+
+        ``GET /v1/prashna/kp-horary``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "number", number)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request("/v1/prashna/kp-horary", _q, request_options=request_options)
 
     async def lagna_lord(
         self,

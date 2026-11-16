@@ -2255,7 +2255,7 @@
    {
     "wire": "cusp",
     "type": "integer",
-    "required": true,
+    "required": false,
     "field": "cusp"
    },
    {
@@ -2340,7 +2340,7 @@
     "name": "cusp",
     "node": "cusp",
     "type": "int",
-    "required": true,
+    "required": false,
     "kind": "scalar",
     "wires": [
      "cusp"
@@ -2370,7 +2370,7 @@
    {
     "wire": "planet",
     "type": "string",
-    "required": true,
+    "required": false,
     "field": "planet"
    },
    {
@@ -2455,7 +2455,7 @@
     "name": "planet",
     "node": "planet",
     "type": "str",
-    "required": true,
+    "required": false,
     "kind": "scalar",
     "wires": [
      "planet"
@@ -16514,6 +16514,111 @@
     "kind": "scalar",
     "wires": [
      "ayanamsa"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
+    ]
+   }
+  ]
+ },
+ {
+  "key": "prashna.kpHorary",
+  "py": "prashna.kp_horary",
+  "path": "/v1/prashna/kp-horary",
+  "shape": "moment",
+  "cost": 30,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "number",
+    "type": "integer",
+    "required": true,
+    "field": "number"
+   },
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "time"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "number",
+    "node": "number",
+    "type": "int",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "number"
     ]
    },
    {

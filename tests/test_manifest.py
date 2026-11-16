@@ -24,13 +24,15 @@ EXAMPLES: dict[str, Any] = json.loads(
     (Path(__file__).parent / "fixtures" / "examples.json").read_text()
 )
 #: Same number of methods as the Node SDK 0.8.0 (and the Dart SDK).
-NODE_METHOD_COUNT = 322
+NODE_METHOD_COUNT = 323
 
 #: Params the examples list as required that the SDK leaves out on purpose.
 NOT_REALLY_REQUIRED = {
     # The handler reads `tz` only together with `date` (the transit moment);
     # like the Node SDK, transit.sade_sati sends the natal chart only.
     "/v1/transit/sade-sati": {"tz"},
+    # Same rule: the transit moment defaults to now, and `tz` only goes with `date`.
+    "/v1/vedic/narrative/transit-ashtakavarga": {"tz"},
 }
 
 
@@ -135,7 +137,7 @@ def test_only_the_no_lang_list_of_vedic_methods_lacks_lang() -> None:
     without = [e["key"] for e in vedic if not has_param(e, "lang")]
     # manifest.mjs NO_LANG: 25 Vedic endpoints that return only times, numbers or ids.
     assert len(without) == 25, without
-    assert len(vedic) - len(without) == 189
+    assert len(vedic) - len(without) == 190
 
 
 def _example_for(path: str) -> dict[str, Any] | None:

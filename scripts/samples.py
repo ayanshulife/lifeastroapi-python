@@ -115,6 +115,7 @@ WIRE: dict[str, Any] = {
     "maha": "Jupiter",
     "month": 11,
     "name": "Arjun Mehta",
+    "number": 23,
     "natal_planet": "Sun",
     "transit_planet": "Saturn",
     "observer_lat": B["lat"],
