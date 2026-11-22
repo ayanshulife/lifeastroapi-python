@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.3.0 — 2026-11-22
+
+Upgrading from 0.2.0: your code keeps working. The install is the same and has no new dependency.
+
+- **New: PDF reports.** `lifeastroapi.pdf` turns the JSON of every `client.reports.*` method into a
+  branded PDF, in all 10 languages, with one call: `kundli_lite_pdf(report, branding)`,
+  `match_making_pdf(...)`, and so on.
+  - The PDF is made on your machine, with Chrome, Chromium or Microsoft Edge (found
+    automatically) or with a Gotenberg service you run. Nothing is sent to LifeAstroAPI for it.
+  - Your branding: company name and footer line as you wrote them, logo, colours, and a watermark
+    on every page. The Brihad kundli follows your colours in headings, banners, contents, charts,
+    header and footer, and is saffron without a brand. A colour too pale to read prints darker.
+  - The Brihad kundli PDF has a table of contents with the real page numbers, a running header
+    and footer with your company name and footer line, bookmarks in the report's language and the
+    document title.
+  - `PdfOptions` for margins (side by side), paper size, landscape, printing without backgrounds,
+    your own header and footer, and timeouts. They apply to the reports and to your own HTML.
+  - For many PDFs, keep one browser open with `ChromePdfEngine`. In `asyncio` code use the
+    `*_pdf_async` functions: they do not block, and they stop when the task is cancelled.
+  - Only need HTML, for a browser or an app's web view? The `render_*_html` functions need no
+    browser and give the same HTML as the Node.js SDK. `A4_PRINT_OPTIONS` has the page size and
+    margins.
+  - A failed PDF raises `PdfError` (a `LifeAstroError`), whose `code` says what went wrong.
+- **Fixed:** the `HouseSystem` type now has `"whole_sign"`, the name the API reads. The old
+  `"whole-sign"` got a 400 error from the API until 2026-11-21. The API now accepts it as an
+  alias and the type still lists it, so code that uses it keeps working and type-checking.
+- **Punjabi (`pa`)** is now a complete language, prose included.
+
 ## 0.2.0 — 2026-11-15
 
 - New `prashna.kp_horary(number=..., lat=..., lon=..., tz=..., date=..., time=...)`: the KP horary
@@ -47,4 +75,3 @@ First release of the official Python SDK.
 - `client.request(path, query)` / `client.get(...)` to call any `/v1/*` endpoint directly.
 - Responses are the parsed JSON (`dict` / `list`). Full type hints, `py.typed`, checked with
   `mypy --strict`. Every method's docstring has the endpoint description, credit cost and path.
-- Not in this version: branded PDF rendering of `reports.*` (the Node SDK's `lifeastroapi/pdf`).

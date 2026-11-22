@@ -15,6 +15,8 @@ location-aware calculations and pay-per-call billing. Free tier: 1,500 credits a
   and `pa` with `lang=`.
 - **Typed**: full type hints and `py.typed`; keyword arguments with `Literal` types for
   languages, ayanamsas and house systems. Passes `mypy --strict`.
+- **Branded PDF reports**: `lifeastroapi.pdf` turns the report JSON into HTML and PDF on your
+  own machine, with no extra dependency ([PDF reports](#pdf-reports)).
 - Typed errors, automatic retries (429, 5xx and network errors) that honour `Retry-After`,
   timeouts, and an escape hatch for any endpoint.
 - Python 3.9 and later.
@@ -89,7 +91,7 @@ asyncio.run(main())
 Every method of `LifeAstro` exists on `AsyncLifeAstro` with the same arguments, as a coroutine.
 
 More in [examples/](https://github.com/ayanshulife/lifeastroapi-python/tree/main/examples):
-quick start, async calls, and error handling.
+quick start, async calls, error handling and PDF reports.
 
 ## Authentication
 
@@ -213,7 +215,7 @@ chart = client.chart.planets(**arjun, lang="ta")
 | `ta` | Tamil | complete |
 | `kn` | Kannada | complete |
 | `ml` | Malayalam | complete |
-| `pa` | Punjabi | names and terms; longer prose is still English |
+| `pa` | Punjabi | complete |
 
 - The `Locale` type lists the codes, and `LOCALES` holds them as a tuple.
 - **Where it works:** `panchang`, `calendar`, `festivals`, `eclipses`, `planet_moments`,
@@ -250,7 +252,7 @@ chart = client.chart.planets(**arjun, lang="ta")
 | `ashtakavarga` | sarva, bhinna (per planet), kaksha, transit score |
 | `geo` | place search, reverse geocoding, time zone, place by id |
 | `tarot` | cards, one card, daily card, spread, yes / no |
-| `reports` | JSON reports: kundli (lite, detailed, brihad), match making, mangal dosha, sade sati, varshaphal, numerology, horoscopes |
+| `reports` | JSON reports, which [`lifeastroapi.pdf`](#pdf-reports) turns into PDF: kundli (lite, detailed, brihad), match making, mangal dosha, sade sati, varshaphal, numerology, horoscopes |
 | `narrative` | authored Vedic readings (lagna, planets, yogas, doshas, dasha phal, transit phal, prashna, horoscopes, ...) |
 | `remedies` | remedies by rule id, `for_graha`, mantra, pooja, vrat, daan, rudraksha, yantra, Lal Kitab |
 | `lalkitab` | Lal Kitab chart and dasha |
@@ -313,6 +315,7 @@ except LifeAstroError as err:
 | `ServerError` | 5xx |
 | `LifeAstroConnectionError` | network failure, no response (`status == 0`) |
 | `LifeAstroTimeoutError` | the request timed out (a `LifeAstroConnectionError`) |
+| `lifeastroapi.pdf.PdfError` | a PDF could not be made (`status == 0`; see [PDF reports](#pdf-reports)) |
 
 All of them extend `LifeAstroError`. Requests are retried automatically (`max_retries`, default
 2) on 408, 425, 429, 500, 502, 503, 504, network errors and timeouts, with exponential backoff
@@ -393,8 +396,261 @@ data = client.request(
 
 ## PDF reports
 
-The `reports.*` methods return the report JSON. Branded PDF rendering of those reports, which
-the Node SDK offers in `lifeastroapi/pdf`, is planned for a later version of this package.
+`lifeastroapi.pdf` turns the JSON of any `reports.*` method into a branded, print-ready PDF
+(kundli lite, detailed and Brihad, match making, mangal dosha, sade sati, varshaphal, numerology,
+dasha analysis, horoscopes) in all 10 languages. It is part of the normal install.
+
+The PDF is made on **your** machine. LifeAstroAPI returns the report JSON (that call costs the
+report's credits); turning it into HTML and PDF costs nothing and sends nothing to LifeAstroAPI.
+
+```python
+from lifeastroapi import LifeAstro
+from lifeastroapi.pdf import kundli_detailed_pdf
+
+report = LifeAstro().reports.kundli_detailed(**arjun, name="Arjun Mehta", lang="hi")
+pdf = kundli_detailed_pdf(report, {"company_name": "Acme Astro", "primary_color": "#6b21a8"})
+with open("kundli.pdf", "wb") as file:
+    file.write(pdf)
+```
+
+Pass what the client returned: there is nothing to convert. The PDF is in the `lang` you
+requested the report in.
+
+| `client.reports.` | HTML | PDF |
+|---|---|---|
+| `kundli_lite` | `render_kundli_lite_html` | `kundli_lite_pdf` |
+| `kundli_detailed` | `render_kundli_detailed_html` | `kundli_detailed_pdf` |
+| `kundli_brihad` | `render_kundli_brihad_html` | `kundli_brihad_pdf` (table of contents, running header, bookmarks) |
+| `match_making` | `render_match_making_html` | `match_making_pdf` |
+| `mangal_dosha` | `render_mangal_dosha_html` | `mangal_dosha_pdf` |
+| `sade_sati` | `render_sade_sati_html` | `sade_sati_pdf` |
+| `varshaphal` | `render_varshaphal_html` | `varshaphal_pdf` |
+| `numerology` | `render_numerology_html` | `numerology_pdf` |
+| `dasha_analysis` | `render_dasha_analysis_html` | `dasha_analysis_pdf` |
+| `horoscope_daily`, `horoscope_weekly`, `horoscope_monthly` | `render_horoscope_html` | `horoscope_pdf` |
+
+Every `*_pdf` function has a `*_pdf_async` twin. `html_to_pdf` and `html_to_pdf_async` print your
+own HTML. The `render_*_html` functions are pure Python (no browser, process, file or network
+access) and give the same bytes as the Node.js SDK.
+
+### The browser and fonts
+
+A PDF needs Chrome, Chromium or Microsoft Edge on the machine that makes it, and fonts for the
+scripts you print (a missing font shows as empty boxes):
+
+| Where it prints | Browser | Fonts for the Indian scripts |
+|---|---|---|
+| Debian, Ubuntu, Docker | `chromium`, or Google Chrome | `fonts-noto-core` |
+| Other Linux | Chrome, Chromium or Edge | Noto Sans for Devanagari, Bengali, Gujarati, Gurmukhi, Tamil, Telugu, Kannada, Malayalam |
+| macOS | Chrome, Chromium or Edge | the system fonts, or Noto Sans |
+| Windows | Chrome, or Microsoft Edge | the system's Nirmala UI, or Noto Sans |
+| Gotenberg | inside its image | inside its image |
+
+```dockerfile
+FROM python:3.12-slim
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends chromium fonts-noto-core
+RUN pip install lifeastroapi
+```
+
+The browser is looked up in `LIFEASTRO_CHROME`, `CHROME_PATH` and `PUPPETEER_EXECUTABLE_PATH`,
+then in the usual install locations. You can also pass `ChromePdfEngine(executable=...)`.
+`--no-sandbox` is added only when the process runs as root, where Chrome cannot start without
+it. Set `no_sandbox=` to decide yourself.
+
+### Reuse one browser
+
+Without `engine=`, each call starts a browser and closes it. For more than one PDF, keep an
+engine:
+
+```python
+from lifeastroapi.pdf import ChromePdfEngine, kundli_lite_pdf
+
+with ChromePdfEngine() as engine:
+    pdfs = [kundli_lite_pdf(report, engine=engine) for report in reports]
+```
+
+The engine starts its browser on first use, can be shared between threads and tasks, and can be
+created before a `fork`: each child process starts its own browser. `close()` (or
+`await engine.aclose()`) stops the browser and deletes its temporary profile. Prints still
+running then fail with `PdfError` (code `closed`). If the browser crashes, they fail with
+`browser_failed` and the next call starts a new one. An engine left open is closed when the
+process exits normally.
+
+In Python, SIGTERM (`docker stop`, systemd, `timeout`) ends a process without a normal exit. In
+your own script or worker, turn it into one, so that the browser is stopped too:
+
+```python
+import signal
+import sys
+
+signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+```
+
+### Django
+
+```python
+# views.py
+from django.http import HttpResponse
+from lifeastroapi import LifeAstro
+from lifeastroapi.pdf import ChromePdfEngine, kundli_lite_pdf
+
+client = LifeAstro()
+engine = ChromePdfEngine()  # starts on first use
+
+
+def kundli_pdf(request):
+    q = request.GET
+    report = client.reports.kundli_lite(
+        date=q["date"], time=q["time"], tz=q["tz"], lat=float(q["lat"]), lon=float(q["lon"])
+    )
+    pdf = kundli_lite_pdf(report, {"company_name": "Acme Astro"}, engine=engine)
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="kundli.pdf"'
+    return response
+```
+
+### FastAPI
+
+```python
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Response
+from lifeastroapi import AsyncLifeAstro
+from lifeastroapi.pdf import ChromePdfEngine, kundli_lite_pdf_async
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with AsyncLifeAstro() as client, ChromePdfEngine() as engine:
+        app.state.client, app.state.engine = client, engine
+        yield
+
+
+app = FastAPI(lifespan=lifespan)
+
+
+@app.get("/kundli.pdf")
+async def kundli(date: str, time: str, tz: str, lat: float, lon: float) -> Response:
+    report = await app.state.client.reports.kundli_lite(
+        date=date, time=time, tz=tz, lat=lat, lon=lon
+    )
+    pdf = await kundli_lite_pdf_async(report, engine=app.state.engine)  # the loop stays free
+    return Response(pdf, media_type="application/pdf")
+```
+
+### Celery (and other job queues)
+
+The Brihad kundli runs to a few hundred pages and prints twice, so make it in a background job:
+
+```python
+from pathlib import Path
+
+from celery import shared_task
+from celery.signals import worker_process_shutdown
+from lifeastroapi import LifeAstro
+from lifeastroapi.pdf import ChromePdfEngine, PdfOptions, kundli_brihad_pdf
+
+engine = ChromePdfEngine()  # each worker process starts its own browser on first use
+worker_process_shutdown.connect(lambda **_: engine.close(), weak=False)
+
+
+@shared_task
+def brihad_pdf(birth: dict, path: str) -> None:
+    with LifeAstro(timeout=120) as client:
+        report = client.reports.kundli_brihad(**birth)
+    pdf = kundli_brihad_pdf(report, engine=engine, options=PdfOptions(timeout=90))
+    Path(path).write_bytes(pdf)
+```
+
+### Without a browser: Gotenberg
+
+Run [Gotenberg](https://gotenberg.dev) anywhere you control
+(`docker run --rm -p 3000:3000 gotenberg/gotenberg:8`) and print through it:
+
+```python
+from lifeastroapi.pdf import GotenbergPdfEngine, match_making_pdf
+
+engine = GotenbergPdfEngine("http://localhost:3000")  # headers={...} for auth
+pdf = match_making_pdf(report, engine=engine)
+```
+
+### Desktop, mobile and the browser
+
+Let your backend call the API and render, and print the HTML in the app's web view or in the
+user's browser (Print, then "Save as PDF"). The API key stays on your server. The HTML sets A4
+pages and margins in its own CSS. For print APIs that ignore CSS `@page` (iOS), send the
+geometry along:
+
+```python
+from lifeastroapi.pdf import A4_PRINT_OPTIONS, render_kundli_lite_html
+
+payload = {"html": render_kundli_lite_html(report), "print": A4_PRINT_OPTIONS}  # in points
+```
+
+The Brihad table of contents, running header and bookmarks are added by `kundli_brihad_pdf`.
+
+### Branding
+
+Every key is optional. What you pass wins over the `Branding` inside the report JSON.
+
+```python
+from lifeastroapi.pdf import Branding
+
+branding: Branding = {
+    "company_name": "Acme Astro",
+    "logo_url": "https://acme.example/logo.png",  # https, or a data:image/... URI
+    "primary_color": "#6b21a8",  # headings, banners, table headers, charts
+    "secondary_color": "#9333ea",  # meta text, footer, gold details
+    "footer_text": "Acme Astro · www.acme.example",
+    "watermark_text": "SAMPLE",  # on every page, behind the content
+}
+```
+
+Colours take any CSS form (`#6b21a8`, `rebeccapurple`, `rgb(...)`, `hsl(...)`). One that is too
+pale to read on paper is printed darker. The Brihad kundli is saffron until you or the report give
+a brand colour, and then follows it in headings, banners, contents, charts, header and footer. The
+API's default colours in a report do not count as a brand. The company name and footer line print
+as you wrote them. A blank value counts as not set.
+
+The browser fetches the logo while it prints. If the branding comes from your own customers,
+check the logo URL first, or run the browser without access to your internal network.
+
+### Options, timeouts and errors
+
+```python
+import threading
+
+from lifeastroapi.pdf import PdfError, PdfOptions, numerology_pdf
+
+options = PdfOptions(
+    timeout=30,  # seconds for the page, images and fonts to load
+    print_timeout=180,  # seconds for each print; raise it for a long Brihad on a slow machine
+)
+cancel = threading.Event()  # set it from another thread to stop the job
+try:
+    pdf = numerology_pdf(report, options=options, cancel=cancel)
+except PdfError as err:
+    print(err.code, err.message)
+```
+
+The reports set A4 and their margins themselves. What you set in `PdfOptions` wins over that:
+
+| Option | Effect |
+|---|---|
+| `margin=PdfMargin(top="30mm")` | Each side you set (`mm`, `cm`, `in`, `px`, or a number of pixels). The other sides keep the report's margin. `"0"` is zero |
+| `format="Letter"` | `A3`, `A4`, `A5`, `Letter`, `Legal` or `Tabloid` paper |
+| `landscape=True` | Landscape paper |
+| `prefer_css_page_size` | `True` keeps the HTML's own page size, `False` scales the page to the paper |
+| `print_background=False` | No background colours; text that is white on colour prints dark |
+| `display_header_footer=True` | Prints your `header_template` and `footer_template` instead of the report's footer line. The Brihad kundli prints its own unless you give templates; `False` turns them off |
+| `scale=0.9` | Render scale, 0.1 to 2 |
+
+With the default options your HTML is printed untouched.
+
+`err.code` is one of `browser_not_found`, `browser_failed`, `timeout`, `cancelled`, `closed`,
+`gotenberg_failed` or `invalid_pdf`. The `*_pdf_async` functions stop when their task is
+cancelled.
 
 ## Development
 
@@ -410,6 +666,18 @@ python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 `scripts/generate.py` reads the endpoint manifest of the Node SDK (`../lifeastroapi-node`,
 through its `scripts/manifest.mjs`, so it needs `node`), so both SDKs always have the same
 methods. `--costs-url <base url>` refreshes the credit costs from `GET /v1/meta/endpoints`.
+
+The PDF templates in `src/lifeastroapi/pdf/_templates` are generated from the Node SDK's
+TypeScript templates, so do not edit them by hand:
+
+```bash
+node scripts/generate_pdf.mjs     # regenerate the templates (needs the Node SDK's dev dependencies)
+node scripts/pdf_goldens.mjs      # regenerate tests/fixtures/pdf from the Node SDK
+```
+
+The PDF tests compare the HTML byte for byte with Node. With `LIFEASTRO_PDF_WORK` pointing at the
+shared PDF reference they also check every full report; that test is skipped without it, and the
+browser tests are skipped without a browser.
 
 `scripts/live_sweep.py` calls every method once against a real server and lists the calls the
 API rejects. It spends credits (one call per endpoint) and has no default URL:

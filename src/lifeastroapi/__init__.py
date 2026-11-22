@@ -5,6 +5,8 @@
     client = LifeAstro(api_key="dv_live_...")  # or set LIFEASTRO_API_KEY
     day = client.panchang.basic(lat=23.0225, lon=72.5714, tz="Asia/Kolkata", lang="gu")
 
+Branded PDF reports, made on your own machine: :mod:`lifeastroapi.pdf`.
+
 Docs: https://lifeastroapi.com/docs/
 """
 

@@ -12,9 +12,9 @@ from typing import Callable, Literal, TypedDict, Union
 
 #: Response language, passed as ``lang`` on Vedic methods.
 #:
-#: - Complete: ``en`` (default), ``hi``, ``mr``, ``gu``, ``bn``, ``te``, ``ta``, ``kn``, ``ml``.
+#: - Complete: ``en`` (default), ``hi``, ``mr``, ``gu``, ``bn``, ``te``, ``ta``, ``kn``, ``ml``,
+#:   ``pa``.
 #:   Names, terms and prose come back in the language.
-#: - ``pa``: names and terms only; longer prose is still English.
 #:
 #: Ids, dates, numbers and explicit ``*_en`` / ``*_hi`` fields stay as they are in
 #: every language. Western, tarot, geo and meta methods answer in English.
@@ -26,9 +26,10 @@ LOCALES: tuple[Locale, ...] = ("en", "hi", "mr", "gu", "bn", "te", "ta", "kn", "
 #: Sidereal ayanamsa systems supported by the API (``lahiri`` is the default).
 Ayanamsa = Literal["lahiri", "krishnamurti", "raman", "fagan", "yukteshwar", "true_chitrapaksha"]
 
-#: House systems supported by the API.
+#: House systems supported by the API. ``"whole-sign"`` is the spelling of SDK 0.2.0 and
+#: earlier, which the API reads as ``"whole_sign"``.
 HouseSystem = Literal[
-    "whole-sign", "equal", "placidus", "koch", "porphyry", "campanus", "regiomontanus"
+    "whole_sign", "whole-sign", "equal", "placidus", "koch", "porphyry", "campanus", "regiomontanus"
 ]
 
 
