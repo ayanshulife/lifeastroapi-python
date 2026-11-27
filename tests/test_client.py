@@ -233,13 +233,30 @@ def test_maps_status_to_error_class(status: int, cls: type[LifeAstroError]) -> N
 
 
 def test_unknown_4xx_is_the_base_error_with_a_default_code() -> None:
-    client = _failing(418, "teapot")
+    client = _failing(418, {"teapot": True})
     with pytest.raises(LifeAstroError) as info:
         client.chart.planets(**BIRTH)
     assert type(info.value) is LifeAstroError
     assert info.value.code == "bad_request"
     assert info.value.message == "HTTP 418"
-    assert info.value.body == "teapot"
+    assert info.value.body == {"teapot": True}
+
+
+def test_html_error_page_is_non_json_response_with_the_class_of_its_status() -> None:
+    client = _failing(403, "<html><body>Access denied</body></html>")
+    with pytest.raises(PermissionDeniedError) as info:
+        client.chart.planets(**BIRTH)
+    assert info.value.code == "non_json_response"
+    assert "HTTP 403" in info.value.message
+    assert "<html><body>Access denied" in info.value.message
+
+
+def test_non_json_success_body_raises_non_json_response() -> None:
+    client = _failing(200, "plain text")
+    with pytest.raises(LifeAstroError) as info:
+        client.request("/v1/text")
+    assert info.value.code == "non_json_response"
+    assert info.value.status == 200
 
 
 def test_maps_429_with_retry_after() -> None:
@@ -467,6 +484,28 @@ def test_raises_when_no_api_key_is_provided() -> None:
     assert info.value.code == "missing_api_key"
 
 
+def test_trims_the_api_key_and_rejects_a_blank_one() -> None:
+    rec = Recorder()
+    make_client(rec, api_key=" dv_live_test\n").request("/v1/x")
+    assert rec.last.headers["Authorization"] == "Bearer dv_live_test"
+    with pytest.raises(LifeAstroError) as info:
+        LifeAstro(api_key=" \n")
+    assert info.value.code == "missing_api_key"
+
+
+def test_a_transport_error_never_carries_the_key() -> None:
+    def fail(request: httpx.Request) -> httpx.Response:
+        raise httpx.LocalProtocolError(
+            f"Illegal header value {request.headers['Authorization']!r}", request=request
+        )
+
+    client = make_client(Recorder(fail), api_key="dv_live_se cret")
+    with pytest.raises(LifeAstroConnectionError) as info:
+        client.request("/v1/x")
+    assert "cret" not in str(info.value)
+    assert "dv_live_se" not in str(info.value)
+
+
 def test_reads_the_api_key_from_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("LIFEASTRO_API_KEY", "dv_live_env")
     rec = Recorder()
@@ -573,7 +612,6 @@ def test_request_hits_an_arbitrary_path() -> None:
     [
         ([1, 2, 3], [1, 2, 3]),
         ({"foo": 1, "bar": 2}, {"foo": 1, "bar": 2}),
-        ("plain text", "plain text"),
     ],
 )
 def test_non_enveloped_bodies_are_returned_as_is(body: Any, expected: Any) -> None:

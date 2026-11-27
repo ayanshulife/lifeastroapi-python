@@ -30,6 +30,8 @@ def _resolve_config(
     on_response: ResponseHook | None,
 ) -> Config:
     key = api_key if api_key is not None else os.environ.get(API_KEY_ENV)
+    # A key read from a file or a quoted .env value often carries a space or newline.
+    key = key.strip() if key else key
     if not key:
         raise LifeAstroError(
             "LifeAstro: an API key is required. Pass api_key=... or set "

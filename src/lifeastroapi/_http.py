@@ -11,6 +11,7 @@ import contextlib
 import json
 import math
 import random
+import re
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
@@ -27,6 +28,7 @@ from .errors import (
     LifeAstroError,
     LifeAstroTimeoutError,
     error_from_response,
+    non_json_error,
 )
 from .types import QueryValue, RateLimit, RequestOptions, ResponseHook, ResponseInfo
 
@@ -159,13 +161,14 @@ def _emit(config: Config, opts: RequestOptions, response: httpx.Response, path: 
             hook(info)
 
 
-def _parse_body(content: bytes) -> Any:
+def _parse_body(content: bytes) -> tuple[Any, bool]:
+    """The parsed body, and whether it was not JSON (then the body is its text)."""
     if not content:
-        return None
+        return None, False
     try:
-        return json.loads(content)
+        return json.loads(content), False
     except ValueError:
-        return content.decode("utf-8", errors="replace")
+        return content.decode("utf-8", errors="replace"), True
 
 
 def _success(body: Any, raw: bool) -> Any:
@@ -176,12 +179,22 @@ def _success(body: Any, raw: bool) -> Any:
     return body
 
 
-def _transport_error(exc: httpx.RequestError, timeout: float) -> LifeAstroConnectionError:
+_BEARER = re.compile(r"(Bearer\s+)[^\s'\"]+")
+
+
+def _transport_error(
+    exc: httpx.RequestError, timeout: float, api_key: str = ""
+) -> LifeAstroConnectionError:
     err: LifeAstroConnectionError
     if isinstance(exc, httpx.TimeoutException):
         err = LifeAstroTimeoutError(f"Request timed out after {timeout:g}s")
     else:
-        err = LifeAstroConnectionError(f"Network request failed: {exc}")
+        # httpx quotes a header value it rejects: never let the key into the message.
+        detail = str(exc)
+        if api_key:
+            detail = detail.replace(api_key, "***")
+        detail = _BEARER.sub(r"\1***", detail)
+        err = LifeAstroConnectionError(f"Network request failed: {detail}")
     err.__cause__ = exc
     return err
 
@@ -215,15 +228,21 @@ class SyncTransport:
             try:
                 response = self._http.request("GET", url, headers=headers, timeout=timeout)
             except httpx.RequestError as exc:
-                err: LifeAstroError = _transport_error(exc, timeout)
+                err: LifeAstroError = _transport_error(exc, timeout, self.config.api_key)
             else:
-                body = _parse_body(response.content)
+                body, non_json = _parse_body(response.content)
                 if 200 <= response.status_code < 300:
                     _emit(self.config, opts, response, path)
+                    if non_json:
+                        # A 2xx that is not JSON is not an API answer (a proxy or captive page).
+                        raise non_json_error(response.status_code, body)
                     return _success(body, opts.get("raw", False))
                 answered = response
                 retry_after = parse_retry_after(response.headers.get("retry-after"))
-                err = error_from_response(response.status_code, body, retry_after)
+                if non_json:
+                    err = non_json_error(response.status_code, body, retry_after)
+                else:
+                    err = error_from_response(response.status_code, body, retry_after)
             if attempt >= self.config.max_retries or not _retryable(err):
                 if answered is not None:
                     _emit(self.config, opts, answered, path)
@@ -261,15 +280,21 @@ class AsyncTransport:
             try:
                 response = await self._http.request("GET", url, headers=headers, timeout=timeout)
             except httpx.RequestError as exc:
-                err: LifeAstroError = _transport_error(exc, timeout)
+                err: LifeAstroError = _transport_error(exc, timeout, self.config.api_key)
             else:
-                body = _parse_body(response.content)
+                body, non_json = _parse_body(response.content)
                 if 200 <= response.status_code < 300:
                     _emit(self.config, opts, response, path)
+                    if non_json:
+                        # A 2xx that is not JSON is not an API answer (a proxy or captive page).
+                        raise non_json_error(response.status_code, body)
                     return _success(body, opts.get("raw", False))
                 answered = response
                 retry_after = parse_retry_after(response.headers.get("retry-after"))
-                err = error_from_response(response.status_code, body, retry_after)
+                if non_json:
+                    err = non_json_error(response.status_code, body, retry_after)
+                else:
+                    err = error_from_response(response.status_code, body, retry_after)
             if attempt >= self.config.max_retries or not _retryable(err):
                 if answered is not None:
                     _emit(self.config, opts, answered, path)

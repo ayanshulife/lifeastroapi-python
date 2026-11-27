@@ -25,6 +25,17 @@ location-aware calculations and pay-per-call billing. Free tier: 1,500 credits a
 pip install lifeastroapi
 ```
 
+**Python 3.9 or later is required.** On an older Python, `pip` answers "No matching distribution
+found". There you can call the API with the standard library alone:
+
+```python
+import json, urllib.request
+
+url = "https://api.lifeastroapi.com/v1/panchang/basic?lat=19.076&lon=72.8777&tz=Asia/Kolkata&date=2026-11-20"
+req = urllib.request.Request(url, headers={"Authorization": "Bearer dv_live_..."})
+day = json.load(urllib.request.urlopen(req, timeout=30))
+```
+
 Get an API key at **https://lifeastroapi.com/dashboard/keys**.
 
 ## Quick start
@@ -127,6 +138,9 @@ client = LifeAstro(
     on_response=None,  # optional; see "Credits, rate limit and request id"
 )
 ```
+
+The `proxy=` argument of `httpx.Client` needs httpx 0.26 or later; on an older httpx write
+`httpx.Client(proxies="http://proxy:3128")`.
 
 Both clients are context managers (`with` / `async with`) and have `close()`
 (a coroutine on `AsyncLifeAstro`). The SDK closes only the httpx client it created itself, never
@@ -316,6 +330,10 @@ except LifeAstroError as err:
 | `LifeAstroConnectionError` | network failure, no response (`status == 0`) |
 | `LifeAstroTimeoutError` | the request timed out (a `LifeAstroConnectionError`) |
 | `lifeastroapi.pdf.PdfError` | a PDF could not be made (`status == 0`; see [PDF reports](#pdf-reports)) |
+
+A response that is not JSON (an HTML page from a proxy or firewall in between, for example)
+raises the error of its status with `code == "non_json_response"`; the message carries the HTTP
+status and the start of the body.
 
 All of them extend `LifeAstroError`. Requests are retried automatically (`max_retries`, default
 2) on 408, 425, 429, 500, 502, 503, 504, network errors and timeouts, with exponential backoff

@@ -134,7 +134,25 @@ def error_from_response(status: int, body: Any, retry_after: float | None = None
         "body": body,
     }
     text = message if isinstance(message, str) and message else f"HTTP {status}"
+    return _build(status, text, retry_after, kwargs)
 
+
+def non_json_error(status: int, text: str, retry_after: float | None = None) -> LifeAstroError:
+    """The error for a response whose body is not JSON: it did not come from the API
+    (an HTML page from a proxy, firewall or CDN in between). Same class per status as
+    :func:`error_from_response`, with code ``non_json_response``."""
+    snippet = " ".join(text.split())[:120]
+    message = (
+        f"The response did not come from the API as JSON (HTTP {status}). "
+        f"A proxy, firewall or CDN in between may have answered. Body starts: {snippet}"
+    )
+    kwargs: dict[str, Any] = {"code": "non_json_response", "status": status, "body": text}
+    return _build(status, message, retry_after, kwargs)
+
+
+def _build(
+    status: int, text: str, retry_after: float | None, kwargs: dict[str, Any]
+) -> LifeAstroError:
     if status == 400:
         return BadRequestError(text, **kwargs)
     if status == 401:
