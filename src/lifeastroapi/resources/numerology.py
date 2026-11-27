@@ -131,8 +131,8 @@ class Numerology:
     def full(
         self,
         *,
+        dob: str,
         name: str | None = None,
-        dob: str | None = None,
         lang: Locale | None = None,
         request_options: RequestOptions | None = None,
     ) -> Any:
@@ -146,6 +146,7 @@ class Numerology:
         put(_q, "name", name)
         put(_q, "dob", dob)
         put(_q, "lang", lang)
+        put(_q, "dob", dob)
         return self._c.request("/v1/numerology/full", _q, request_options=request_options)
 
     def personal_periods(
@@ -334,8 +335,8 @@ class AsyncNumerology:
     async def full(
         self,
         *,
+        dob: str,
         name: str | None = None,
-        dob: str | None = None,
         lang: Locale | None = None,
         request_options: RequestOptions | None = None,
     ) -> Any:
@@ -349,6 +350,7 @@ class AsyncNumerology:
         put(_q, "name", name)
         put(_q, "dob", dob)
         put(_q, "lang", lang)
+        put(_q, "dob", dob)
         return await self._c.request("/v1/numerology/full", _q, request_options=request_options)
 
     async def personal_periods(

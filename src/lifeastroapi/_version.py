@@ -1,3 +1,3 @@
 """SDK version, sent in the ``User-Agent`` header."""
 
-__version__ = "0.3.0"
+__version__ = "1.0.0"

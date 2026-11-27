@@ -13102,7 +13102,14 @@
   "shape": "numerology",
   "cost": 20,
   "pathParams": [],
-  "extras": [],
+  "extras": [
+   {
+    "wire": "dob",
+    "type": "string",
+    "required": true,
+    "field": "dob"
+   }
+  ],
   "params": [
    {
     "name": "name",
@@ -13118,7 +13125,7 @@
     "name": "dob",
     "node": "dob",
     "type": "str",
-    "required": false,
+    "required": true,
     "kind": "scalar",
     "wires": [
      "dob"

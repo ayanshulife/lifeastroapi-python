@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.0.0 — 2026-11-27
+
+This is the first stable release. From 1.0.0 on, a change that needs a code change on your side
+only comes with a new major version. The install is the same and has no new dependency.
+
+- **Easier key setup.** The API key is trimmed of spaces and line breaks around it, so a key read
+  from a file or a quoted `.env` value works as it is.
+- **The key never appears in an error message.** When the HTTP library rejects a request header,
+  its message quoted the value. The SDK now replaces the key with `***` before raising
+  `LifeAstroConnectionError`.
+- **Clear error for a reply that is not JSON.** Such a reply did not come from the API: a proxy,
+  firewall or CDN in between answered, usually with an HTML page. It now raises the error of its
+  HTTP status with `code == "non_json_response"`; the message gives the status and the start of
+  the body.
+- README: what to do on a Python older than 3.9, the `proxy=` argument on older httpx, and the
+  `non_json_response` error.
+
+**Changes that may need a code change**
+
+- A 200 reply with a body that is not JSON now raises instead of returning the text.
+  Before: `text = client.request(path)` gave you the body as a `str`.
+  Now: `except LifeAstroError as err:` with `err.code == "non_json_response"`; `err.body` holds
+  the text.
+- `numerology.full` requires `dob`. The API always required it; a call without it now raises
+  `TypeError` before any request is made, instead of a 400 from the API.
+  Before: `client.numerology.full(name="Arjun Mehta")` was accepted by the SDK.
+  Now: `client.numerology.full(dob="1990-01-15", name="Arjun Mehta")`
+
 ## 0.3.0 — 2026-11-22
 
 Upgrading from 0.2.0: your code keeps working. The install is the same and has no new dependency.
