@@ -927,6 +927,133 @@ def test_ayanamsa_on_calendar_and_planet_moments() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Ashtottari, Jaimini and muhurta rites endpoints (1.1.0)
+# ---------------------------------------------------------------------------
+PLACE: dict[str, Any] = {"lat": 19.076, "lon": 72.8777, "tz": "Asia/Kolkata"}
+
+
+def _assert_birth_unprefixed(q: httpx.QueryParams) -> None:
+    assert (q["date"], q["time"], q["tz"], q["lat"], q["lon"]) == (
+        "1990-01-15",
+        "10:30",
+        "Asia/Kolkata",
+        "19.076",
+        "72.8777",
+    )
+    assert "birth.date" not in q
+
+
+def test_dasha_ashtottari_and_current() -> None:
+    rec = Recorder()
+    client = make_client(rec)
+    client.dasha.ashtottari(**BIRTH, depth=2, scheme=27, antar_start="next_lord", lang="hi")
+    client.dasha.ashtottari_current(
+        **BIRTH, at="2027-01-15T00:00:00Z", scheme=28, antar_start="maha_lord"
+    )
+    assert rec.requests[0].url.path == "/v1/dasha/ashtottari"
+    q = rec.params(0)
+    _assert_birth_unprefixed(q)
+    assert (q["depth"], q["scheme"], q["antar_start"], q["lang"], q["locale"]) == (
+        "2",
+        "27",
+        "next_lord",
+        "hi",
+        "hi",
+    )
+    assert rec.requests[1].url.path == "/v1/dasha/ashtottari/current"
+    q = rec.params(1)
+    _assert_birth_unprefixed(q)
+    assert (q["at"], q["scheme"], q["antar_start"]) == ("2027-01-15T00:00:00Z", "28", "maha_lord")
+
+
+def test_chart_arudha_padas_upapada_and_argala() -> None:
+    rec = Recorder()
+    client = make_client(rec)
+    client.chart.arudha_padas(**BIRTH, exception="none", scorpio_lord="ketu", aquarius_lord="rahu")
+    client.chart.upapada(**BIRTH, exception="none", scorpio_lord="ketu", aquarius_lord="rahu")
+    client.chart.argala(
+        **BIRTH, house=7, include_eighth=True, node_reversal="rahu_ketu", vipareeta_min_malefics=2
+    )
+    client.chart.argala(**BIRTH)
+    for i, path in enumerate(["/v1/chart/arudha-padas", "/v1/chart/upapada"]):
+        q = rec.params(i)
+        assert rec.requests[i].url.path == path
+        _assert_birth_unprefixed(q)
+        assert (q["exception"], q["scorpio_lord"], q["aquarius_lord"]) == ("none", "ketu", "rahu")
+    q = rec.params(2)
+    assert rec.requests[2].url.path == "/v1/chart/argala"
+    _assert_birth_unprefixed(q)
+    assert (q["house"], q["include_eighth"], q["node_reversal"], q["vipareeta_min_malefics"]) == (
+        "7",
+        "true",
+        "rahu_ketu",
+        "2",
+    )
+    assert "house" not in rec.params(3) and "include_eighth" not in rec.params(3)
+
+
+def test_muhurta_rites_score_one_moment() -> None:
+    rec = Recorder()
+    client = make_client(rec)
+    client.muhurta.vahan(**PLACE, date="2027-01-18", time="10:30")
+    client.muhurta.bhoomi_pujan(**PLACE, date="2027-01-18", time="10:30")
+    client.muhurta.upanayan(**PLACE, date="2027-01-18", time="10:30", lang="mr")
+    paths = ["/v1/muhurta/vahan", "/v1/muhurta/bhoomi-pujan", "/v1/muhurta/upanayan"]
+    for i, path in enumerate(paths):
+        q = rec.params(i)
+        assert rec.requests[i].url.path == path
+        assert (q["date"], q["time"], q["lat"], q["tz"]) == (
+            "2027-01-18",
+            "10:30",
+            "19.076",
+            "Asia/Kolkata",
+        )
+        assert "start_date" not in q
+    assert rec.params(2)["lang"] == "mr"
+
+
+def test_muhurta_sanskar_birth_date_and_sex() -> None:
+    rec = Recorder()
+    client = make_client(rec)
+    client.muhurta.annaprashan(
+        **PLACE, date="2027-01-18", time="10:30", birth_date="2026-07-01", sex="female"
+    )
+    client.muhurta.vidyarambh(**PLACE, date="2027-01-18", birth_date="2022-03-10")
+    client.muhurta.karnavedha(**PLACE, date="2027-01-18", birth_date="2026-11-01")
+    client.muhurta.annaprashan(**PLACE, date="2027-01-18")
+    assert rec.requests[0].url.path == "/v1/muhurta/annaprashan"
+    assert (rec.params(0)["birth_date"], rec.params(0)["sex"]) == ("2026-07-01", "female")
+    assert rec.requests[1].url.path == "/v1/muhurta/vidyarambh"
+    assert rec.params(1)["birth_date"] == "2022-03-10"
+    assert rec.requests[2].url.path == "/v1/muhurta/karnavedha"
+    assert rec.params(2)["birth_date"] == "2026-11-01"
+    assert "birth_date" not in rec.params(3) and "sex" not in rec.params(3)
+
+
+def test_best_time_new_purposes_and_direction() -> None:
+    rec = Recorder()
+    client = make_client(rec)
+    window: dict[str, Any] = {**PLACE, "start_date": "2027-01-01", "end_date": "2027-01-31"}
+    client.muhurta.best_time(**window, purpose="yatra", direction="NE")
+    assert rec.last.url.path == "/v1/muhurta/best-time"
+    assert (rec.params()["purpose"], rec.params()["direction"]) == ("yatra", "NE")
+    for purpose in ("vyapar", "vahan", "bhoomi_pujan"):
+        client.muhurta.best_time(**window, purpose=purpose)
+        assert rec.params()["purpose"] == purpose
+        assert "direction" not in rec.params()
+
+
+def test_yatra_sends_direction_only_when_given() -> None:
+    rec = Recorder()
+    client = make_client(rec)
+    client.muhurta.yatra(**PLACE, date="2027-01-18", time="07:00", direction="W")
+    client.muhurta.yatra(**PLACE, date="2027-01-18", time="07:00")
+    assert rec.requests[0].url.path == "/v1/muhurta/yatra"
+    assert rec.params(0)["direction"] == "W"
+    assert "direction" not in rec.params(1)
+
+
+# ---------------------------------------------------------------------------
 # on_response (credits, rate limit, request id)
 # ---------------------------------------------------------------------------
 RESPONSE_HEADERS = {

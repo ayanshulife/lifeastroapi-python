@@ -19,6 +19,47 @@ class Muhurta:
     def __init__(self, client: SyncCore) -> None:
         self._c = client
 
+    def annaprashan(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        birth_date: str | None = None,
+        sex: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for Annaprashan (a child's first solid food) (20 credits): tithi,
+        weekday, nakshatra, paksha, Rahu Kaal, Yamaganda, Durmuhurta and Bhadra. result has score
+        (0-100), grade, is_acceptable, prohibited_by, factors and warnings; prohibited_by lists
+        the classical prohibitions that apply (English factor ids), and whenever it is not empty
+        grade is `inauspicious` and is_acceptable is false. The prohibition for this purpose is
+        Bhadra. result.notes holds informational sentences (age by tradition, festival days) that
+        never change the score. With birth_date (YYYY-MM-DD) and sex (`male` or `female`) a note
+        gives the child's running month and the months tradition names. Each `factors[]` item has
+        a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/annaprashan``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "birth_date", birth_date)
+        put(_q, "sex", sex)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/muhurta/annaprashan", _q, request_options=request_options)
+
     def best_time(
         self,
         *,
@@ -31,14 +72,18 @@ class Muhurta:
         top_n: int | None = None,
         birth_date: str | None = None,
         ayanamsa: Ayanamsa | None = None,
+        direction: str | None = None,
         lang: Locale | None = None,
         request_options: RequestOptions | None = None,
     ) -> Any:
         """Best-scoring muhurta windows in a date range. `purpose` is `general` (default), `vivah`,
-        `graha_pravesh` or `naamkaran`; `top_n` (1-20, default 5) sets how many windows come
-        back; `birth_date` (YYYY-MM-DD) weights the windows by the person's tara bala and chandra
-        bala. Each `factors[]` item has a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name`
-        and `value` follow `lang`.
+        `graha_pravesh`, `naamkaran`, `vyapar`, `yatra`, `vahan` or `bhoomi_pujan`; each purpose
+        uses the scorer of its own muhurta method, and moments under one of its classical
+        prohibitions are never returned, so fewer windows (or none) can come back. `direction`
+        (N, NE, E, SE, S, SW, W, NW) is the direction of travel, used only with purpose `yatra`.
+        `top_n` (1-20, default 5) sets how many windows come back; `birth_date` (YYYY-MM-DD)
+        weights the windows by the person's tara bala and chandra bala. Each `factors[]` item has
+        a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 30 credits per call.
 
@@ -54,9 +99,47 @@ class Muhurta:
         put(_q, "top_n", top_n)
         put(_q, "birth_date", birth_date)
         put(_q, "ayanamsa", ayanamsa)
+        put(_q, "direction", direction)
         put(_q, "lang", lang)
         put(_q, "locale", lang)
         return self._c.request("/v1/muhurta/best-time", _q, request_options=request_options)
+
+    def bhoomi_pujan(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for Bhoomi Pujan (ground-breaking, laying a foundation) (20
+        credits): tithi, weekday, nakshatra, solar month, Rahu Kaal, Yamaganda, Durmuhurta,
+        Bhadra, paksha, Jupiter and Venus set, adhika masa. result has score (0-100), grade,
+        is_acceptable, prohibited_by, factors and warnings; prohibited_by lists the classical
+        prohibitions that apply (English factor ids), and whenever it is not empty grade is
+        `inauspicious` and is_acceptable is false. The prohibitions for this purpose are Bhadra,
+        GuruShukraAsta and AdhikaMasa. result.direction (informational, never scored) gives
+        rahu_mukha and start_digging for the solar month. Each `factors[]` item has a stable
+        English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/bhoomi-pujan``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/muhurta/bhoomi-pujan", _q, request_options=request_options)
 
     def chandra_bala(
         self,
@@ -102,8 +185,10 @@ class Muhurta:
         request_options: RequestOptions | None = None,
     ) -> Any:
         """Find auspicious Griha Pravesh (housewarming) muhurta windows in a date range — checks
-        tithi, nakshatra, vara, Sun position, and lagna for the ceremony. Each `factors[]` item
-        has a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+        tithi, nakshatra, vara, Sun position, and lagna for the ceremony. result.prohibited_by
+        lists the classical prohibitions that apply (English factor ids); whenever it is not
+        empty grade is `inauspicious` and is_acceptable is false. Each `factors[]` item has a
+        stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 20 credits per call.
 
@@ -120,6 +205,46 @@ class Muhurta:
         put(_q, "locale", lang)
         return self._c.request("/v1/muhurta/graha-pravesh", _q, request_options=request_options)
 
+    def karnavedha(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        birth_date: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for Karnavedha (ear piercing) (20 credits): tithi, weekday,
+        nakshatra, the Sun's sign, Hari Shayana, Jupiter and Venus set, Rahu Kaal, Yamaganda,
+        Durmuhurta, Bhadra and adhika masa. result has score (0-100), grade, is_acceptable,
+        prohibited_by, factors and warnings; prohibited_by lists the classical prohibitions that
+        apply (English factor ids), and whenever it is not empty grade is `inauspicious` and
+        is_acceptable is false. The prohibitions for this purpose are GuruShukraAsta, AdhikaMasa,
+        HariShayana and Bhadra. result.notes holds informational sentences (age by tradition,
+        festival days) that never change the score. With birth_date (YYYY-MM-DD) a note gives the
+        child's running day, month and year. Each `factors[]` item has a stable English `id`
+        (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/karnavedha``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "birth_date", birth_date)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/muhurta/karnavedha", _q, request_options=request_options)
+
     def naamkaran(
         self,
         *,
@@ -133,7 +258,9 @@ class Muhurta:
         lang: Locale | None = None,
         request_options: RequestOptions | None = None,
     ) -> Any:
-        """Naamkaran (naming ceremony) muhurta windows. Each `factors[]` item has a stable English
+        """Naamkaran (naming ceremony) muhurta windows. result.prohibited_by lists the classical
+        prohibitions that apply (English factor ids); whenever it is not empty grade is
+        `inauspicious` and is_acceptable is false. Each `factors[]` item has a stable English
         `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 20 credits per call.
@@ -275,6 +402,118 @@ class Muhurta:
         put(_q, "birth_nak", birth_nak)
         return self._c.request("/v1/muhurta/tara-bala", _q, request_options=request_options)
 
+    def upanayan(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for the Upanayan (sacred thread) ceremony (20 credits): tithi,
+        weekday, nakshatra, the Sun's course, part of the day, Jupiter and Venus set, Rahu Kaal,
+        Yamaganda, Durmuhurta, Bhadra and adhika masa. result has score (0-100), grade,
+        is_acceptable, prohibited_by, factors and warnings; prohibited_by lists the classical
+        prohibitions that apply (English factor ids), and whenever it is not empty grade is
+        `inauspicious` and is_acceptable is false. The prohibitions for this purpose are
+        GuruShukraAsta, AdhikaMasa, Ayana (Dakshinayana) and Bhadra. result.notes holds
+        informational sentences (age by tradition, festival days) that never change the score.
+        Each `factors[]` item has a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and
+        `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/upanayan``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/muhurta/upanayan", _q, request_options=request_options)
+
+    def vahan(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for buying a vehicle or its first use (20 credits): tithi,
+        weekday, nakshatra, Rahu Kaal, Yamaganda, Durmuhurta and Bhadra. result has score
+        (0-100), grade, is_acceptable, prohibited_by, factors and warnings; prohibited_by lists
+        the classical prohibitions that apply (English factor ids), and whenever it is not empty
+        grade is `inauspicious` and is_acceptable is false. The prohibition for this purpose is
+        Bhadra. Each `factors[]` item has a stable English `id` (e.g. `Tithi`, `RahuKaal`);
+        `name` and `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/vahan``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/muhurta/vahan", _q, request_options=request_options)
+
+    def vidyarambh(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        birth_date: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for Vidyarambh (a child's first letters) (20 credits): tithi,
+        weekday, nakshatra, the Sun's course, Rahu Kaal, Yamaganda, Durmuhurta, Bhadra and adhika
+        masa. result has score (0-100), grade, is_acceptable, prohibited_by, factors and
+        warnings; prohibited_by lists the classical prohibitions that apply (English factor ids),
+        and whenever it is not empty grade is `inauspicious` and is_acceptable is false. The
+        prohibitions for this purpose are AdhikaMasa and Bhadra. result.notes holds informational
+        sentences (age by tradition, festival days) that never change the score. With birth_date
+        (YYYY-MM-DD) a note gives the child's running year. Each `factors[]` item has a stable
+        English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/vidyarambh``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "birth_date", birth_date)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/muhurta/vidyarambh", _q, request_options=request_options)
+
     def vivah(
         self,
         *,
@@ -287,8 +526,10 @@ class Muhurta:
         lang: Locale | None = None,
         request_options: RequestOptions | None = None,
     ) -> Any:
-        """Auspicious wedding (vivah) muhurta windows in a date range. Each `factors[]` item has a
-        stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+        """Auspicious wedding (vivah) muhurta windows in a date range. result.prohibited_by lists
+        the classical prohibitions that apply (English factor ids); whenever it is not empty
+        grade is `inauspicious` and is_acceptable is false. Each `factors[]` item has a stable
+        English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 30 credits per call.
 
@@ -318,9 +559,10 @@ class Muhurta:
         request_options: RequestOptions | None = None,
     ) -> Any:
         """Find auspicious Vyapar (business/trade) muhurta windows — suitable for starting a
-        business, signing contracts, launching a product, or opening a shop. Each `factors[]`
-        item has a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow
-        `lang`.
+        business, signing contracts, launching a product, or opening a shop. result.prohibited_by
+        lists the classical prohibitions that apply (English factor ids); whenever it is not
+        empty grade is `inauspicious` and is_acceptable is false. Each `factors[]` item has a
+        stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 20 credits per call.
 
@@ -346,13 +588,18 @@ class Muhurta:
         date: str | None = None,
         time: str | None = None,
         ayanamsa: Ayanamsa | None = None,
+        direction: str | None = None,
         lang: Locale | None = None,
         request_options: RequestOptions | None = None,
     ) -> Any:
         """Find auspicious Yatra (travel/journey) muhurta windows — avoids Disha Shool (directional
         inauspiciousness), Rahu Kaal, Nak Shool, and favours Pushya/Hasta/Ashwini/Anuradha
-        nakshatras for journeys. Each `factors[]` item has a stable English `id` (e.g. `Tithi`,
-        `RahuKaal`); `name` and `value` follow `lang`.
+        nakshatras for journeys. `direction` (N, NE, E, SE, S, SW, W, NW; full names such as
+        north are also accepted) is the direction of travel: when it is sent the weekday's Disha
+        Shool is checked; without it there is no direction check. result.prohibited_by lists the
+        classical prohibitions that apply (English factor ids); whenever it is not empty grade is
+        `inauspicious` and is_acceptable is false. Each `factors[]` item has a stable English
+        `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 20 credits per call.
 
@@ -365,6 +612,7 @@ class Muhurta:
         put(_q, "date", date if date is not None else today_in(tz))
         put(_q, "time", time)
         put(_q, "ayanamsa", ayanamsa)
+        put(_q, "direction", direction)
         put(_q, "lang", lang)
         put(_q, "locale", lang)
         return self._c.request("/v1/muhurta/yatra", _q, request_options=request_options)
@@ -378,6 +626,47 @@ class AsyncMuhurta:
     def __init__(self, client: AsyncCore) -> None:
         self._c = client
 
+    async def annaprashan(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        birth_date: str | None = None,
+        sex: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for Annaprashan (a child's first solid food) (20 credits): tithi,
+        weekday, nakshatra, paksha, Rahu Kaal, Yamaganda, Durmuhurta and Bhadra. result has score
+        (0-100), grade, is_acceptable, prohibited_by, factors and warnings; prohibited_by lists
+        the classical prohibitions that apply (English factor ids), and whenever it is not empty
+        grade is `inauspicious` and is_acceptable is false. The prohibition for this purpose is
+        Bhadra. result.notes holds informational sentences (age by tradition, festival days) that
+        never change the score. With birth_date (YYYY-MM-DD) and sex (`male` or `female`) a note
+        gives the child's running month and the months tradition names. Each `factors[]` item has
+        a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/annaprashan``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "birth_date", birth_date)
+        put(_q, "sex", sex)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request("/v1/muhurta/annaprashan", _q, request_options=request_options)
+
     async def best_time(
         self,
         *,
@@ -390,14 +679,18 @@ class AsyncMuhurta:
         top_n: int | None = None,
         birth_date: str | None = None,
         ayanamsa: Ayanamsa | None = None,
+        direction: str | None = None,
         lang: Locale | None = None,
         request_options: RequestOptions | None = None,
     ) -> Any:
         """Best-scoring muhurta windows in a date range. `purpose` is `general` (default), `vivah`,
-        `graha_pravesh` or `naamkaran`; `top_n` (1-20, default 5) sets how many windows come
-        back; `birth_date` (YYYY-MM-DD) weights the windows by the person's tara bala and chandra
-        bala. Each `factors[]` item has a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name`
-        and `value` follow `lang`.
+        `graha_pravesh`, `naamkaran`, `vyapar`, `yatra`, `vahan` or `bhoomi_pujan`; each purpose
+        uses the scorer of its own muhurta method, and moments under one of its classical
+        prohibitions are never returned, so fewer windows (or none) can come back. `direction`
+        (N, NE, E, SE, S, SW, W, NW) is the direction of travel, used only with purpose `yatra`.
+        `top_n` (1-20, default 5) sets how many windows come back; `birth_date` (YYYY-MM-DD)
+        weights the windows by the person's tara bala and chandra bala. Each `factors[]` item has
+        a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 30 credits per call.
 
@@ -413,9 +706,49 @@ class AsyncMuhurta:
         put(_q, "top_n", top_n)
         put(_q, "birth_date", birth_date)
         put(_q, "ayanamsa", ayanamsa)
+        put(_q, "direction", direction)
         put(_q, "lang", lang)
         put(_q, "locale", lang)
         return await self._c.request("/v1/muhurta/best-time", _q, request_options=request_options)
+
+    async def bhoomi_pujan(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for Bhoomi Pujan (ground-breaking, laying a foundation) (20
+        credits): tithi, weekday, nakshatra, solar month, Rahu Kaal, Yamaganda, Durmuhurta,
+        Bhadra, paksha, Jupiter and Venus set, adhika masa. result has score (0-100), grade,
+        is_acceptable, prohibited_by, factors and warnings; prohibited_by lists the classical
+        prohibitions that apply (English factor ids), and whenever it is not empty grade is
+        `inauspicious` and is_acceptable is false. The prohibitions for this purpose are Bhadra,
+        GuruShukraAsta and AdhikaMasa. result.direction (informational, never scored) gives
+        rahu_mukha and start_digging for the solar month. Each `factors[]` item has a stable
+        English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/bhoomi-pujan``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request(
+            "/v1/muhurta/bhoomi-pujan", _q, request_options=request_options
+        )
 
     async def chandra_bala(
         self,
@@ -463,8 +796,10 @@ class AsyncMuhurta:
         request_options: RequestOptions | None = None,
     ) -> Any:
         """Find auspicious Griha Pravesh (housewarming) muhurta windows in a date range — checks
-        tithi, nakshatra, vara, Sun position, and lagna for the ceremony. Each `factors[]` item
-        has a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+        tithi, nakshatra, vara, Sun position, and lagna for the ceremony. result.prohibited_by
+        lists the classical prohibitions that apply (English factor ids); whenever it is not
+        empty grade is `inauspicious` and is_acceptable is false. Each `factors[]` item has a
+        stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 20 credits per call.
 
@@ -483,6 +818,46 @@ class AsyncMuhurta:
             "/v1/muhurta/graha-pravesh", _q, request_options=request_options
         )
 
+    async def karnavedha(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        birth_date: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for Karnavedha (ear piercing) (20 credits): tithi, weekday,
+        nakshatra, the Sun's sign, Hari Shayana, Jupiter and Venus set, Rahu Kaal, Yamaganda,
+        Durmuhurta, Bhadra and adhika masa. result has score (0-100), grade, is_acceptable,
+        prohibited_by, factors and warnings; prohibited_by lists the classical prohibitions that
+        apply (English factor ids), and whenever it is not empty grade is `inauspicious` and
+        is_acceptable is false. The prohibitions for this purpose are GuruShukraAsta, AdhikaMasa,
+        HariShayana and Bhadra. result.notes holds informational sentences (age by tradition,
+        festival days) that never change the score. With birth_date (YYYY-MM-DD) a note gives the
+        child's running day, month and year. Each `factors[]` item has a stable English `id`
+        (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/karnavedha``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "birth_date", birth_date)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request("/v1/muhurta/karnavedha", _q, request_options=request_options)
+
     async def naamkaran(
         self,
         *,
@@ -496,7 +871,9 @@ class AsyncMuhurta:
         lang: Locale | None = None,
         request_options: RequestOptions | None = None,
     ) -> Any:
-        """Naamkaran (naming ceremony) muhurta windows. Each `factors[]` item has a stable English
+        """Naamkaran (naming ceremony) muhurta windows. result.prohibited_by lists the classical
+        prohibitions that apply (English factor ids); whenever it is not empty grade is
+        `inauspicious` and is_acceptable is false. Each `factors[]` item has a stable English
         `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 20 credits per call.
@@ -642,6 +1019,118 @@ class AsyncMuhurta:
         put(_q, "birth_nak", birth_nak)
         return await self._c.request("/v1/muhurta/tara-bala", _q, request_options=request_options)
 
+    async def upanayan(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for the Upanayan (sacred thread) ceremony (20 credits): tithi,
+        weekday, nakshatra, the Sun's course, part of the day, Jupiter and Venus set, Rahu Kaal,
+        Yamaganda, Durmuhurta, Bhadra and adhika masa. result has score (0-100), grade,
+        is_acceptable, prohibited_by, factors and warnings; prohibited_by lists the classical
+        prohibitions that apply (English factor ids), and whenever it is not empty grade is
+        `inauspicious` and is_acceptable is false. The prohibitions for this purpose are
+        GuruShukraAsta, AdhikaMasa, Ayana (Dakshinayana) and Bhadra. result.notes holds
+        informational sentences (age by tradition, festival days) that never change the score.
+        Each `factors[]` item has a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and
+        `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/upanayan``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request("/v1/muhurta/upanayan", _q, request_options=request_options)
+
+    async def vahan(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for buying a vehicle or its first use (20 credits): tithi,
+        weekday, nakshatra, Rahu Kaal, Yamaganda, Durmuhurta and Bhadra. result has score
+        (0-100), grade, is_acceptable, prohibited_by, factors and warnings; prohibited_by lists
+        the classical prohibitions that apply (English factor ids), and whenever it is not empty
+        grade is `inauspicious` and is_acceptable is false. The prohibition for this purpose is
+        Bhadra. Each `factors[]` item has a stable English `id` (e.g. `Tithi`, `RahuKaal`);
+        `name` and `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/vahan``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request("/v1/muhurta/vahan", _q, request_options=request_options)
+
+    async def vidyarambh(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        tz: str,
+        date: str | None = None,
+        time: str | None = None,
+        ayanamsa: Ayanamsa | None = None,
+        birth_date: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Score a proposed moment for Vidyarambh (a child's first letters) (20 credits): tithi,
+        weekday, nakshatra, the Sun's course, Rahu Kaal, Yamaganda, Durmuhurta, Bhadra and adhika
+        masa. result has score (0-100), grade, is_acceptable, prohibited_by, factors and
+        warnings; prohibited_by lists the classical prohibitions that apply (English factor ids),
+        and whenever it is not empty grade is `inauspicious` and is_acceptable is false. The
+        prohibitions for this purpose are AdhikaMasa and Bhadra. result.notes holds informational
+        sentences (age by tradition, festival days) that never change the score. With birth_date
+        (YYYY-MM-DD) a note gives the child's running year. Each `factors[]` item has a stable
+        English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+
+        Cost: 20 credits per call.
+
+        ``GET /v1/muhurta/vidyarambh``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "tz", tz)
+        put(_q, "date", date if date is not None else today_in(tz))
+        put(_q, "time", time)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "birth_date", birth_date)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request("/v1/muhurta/vidyarambh", _q, request_options=request_options)
+
     async def vivah(
         self,
         *,
@@ -654,8 +1143,10 @@ class AsyncMuhurta:
         lang: Locale | None = None,
         request_options: RequestOptions | None = None,
     ) -> Any:
-        """Auspicious wedding (vivah) muhurta windows in a date range. Each `factors[]` item has a
-        stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
+        """Auspicious wedding (vivah) muhurta windows in a date range. result.prohibited_by lists
+        the classical prohibitions that apply (English factor ids); whenever it is not empty
+        grade is `inauspicious` and is_acceptable is false. Each `factors[]` item has a stable
+        English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 30 credits per call.
 
@@ -685,9 +1176,10 @@ class AsyncMuhurta:
         request_options: RequestOptions | None = None,
     ) -> Any:
         """Find auspicious Vyapar (business/trade) muhurta windows — suitable for starting a
-        business, signing contracts, launching a product, or opening a shop. Each `factors[]`
-        item has a stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow
-        `lang`.
+        business, signing contracts, launching a product, or opening a shop. result.prohibited_by
+        lists the classical prohibitions that apply (English factor ids); whenever it is not
+        empty grade is `inauspicious` and is_acceptable is false. Each `factors[]` item has a
+        stable English `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 20 credits per call.
 
@@ -713,13 +1205,18 @@ class AsyncMuhurta:
         date: str | None = None,
         time: str | None = None,
         ayanamsa: Ayanamsa | None = None,
+        direction: str | None = None,
         lang: Locale | None = None,
         request_options: RequestOptions | None = None,
     ) -> Any:
         """Find auspicious Yatra (travel/journey) muhurta windows — avoids Disha Shool (directional
         inauspiciousness), Rahu Kaal, Nak Shool, and favours Pushya/Hasta/Ashwini/Anuradha
-        nakshatras for journeys. Each `factors[]` item has a stable English `id` (e.g. `Tithi`,
-        `RahuKaal`); `name` and `value` follow `lang`.
+        nakshatras for journeys. `direction` (N, NE, E, SE, S, SW, W, NW; full names such as
+        north are also accepted) is the direction of travel: when it is sent the weekday's Disha
+        Shool is checked; without it there is no direction check. result.prohibited_by lists the
+        classical prohibitions that apply (English factor ids); whenever it is not empty grade is
+        `inauspicious` and is_acceptable is false. Each `factors[]` item has a stable English
+        `id` (e.g. `Tithi`, `RahuKaal`); `name` and `value` follow `lang`.
 
         Cost: 20 credits per call.
 
@@ -732,6 +1229,7 @@ class AsyncMuhurta:
         put(_q, "date", date if date is not None else today_in(tz))
         put(_q, "time", time)
         put(_q, "ayanamsa", ayanamsa)
+        put(_q, "direction", direction)
         put(_q, "lang", lang)
         put(_q, "locale", lang)
         return await self._c.request("/v1/muhurta/yatra", _q, request_options=request_options)

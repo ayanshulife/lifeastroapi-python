@@ -124,6 +124,38 @@
    "lon": "77.209"
   }
  },
+ "/v1/chart/argala": {
+  "status": 200,
+  "required": [
+   "date",
+   "tz",
+   "lat",
+   "lon"
+  ],
+  "params": {
+   "date": "1990-01-15",
+   "tz": "Asia/Kolkata",
+   "lat": "19.076",
+   "lon": "72.8777",
+   "time": "10:30"
+  }
+ },
+ "/v1/chart/arudha-padas": {
+  "status": 200,
+  "required": [
+   "date",
+   "tz",
+   "lat",
+   "lon"
+  ],
+  "params": {
+   "date": "1990-01-15",
+   "tz": "Asia/Kolkata",
+   "lat": "19.076",
+   "lon": "72.8777",
+   "time": "10:30"
+  }
+ },
  "/v1/chart/ascendant": {
   "status": 200,
   "required": [
@@ -508,6 +540,22 @@
    "time": "10:30"
   }
  },
+ "/v1/chart/upapada": {
+  "status": 200,
+  "required": [
+   "date",
+   "tz",
+   "lat",
+   "lon"
+  ],
+  "params": {
+   "date": "1990-01-15",
+   "tz": "Asia/Kolkata",
+   "lat": "19.076",
+   "lon": "72.8777",
+   "time": "10:30"
+  }
+ },
  "/v1/chart/yogas": {
   "status": 200,
   "required": [
@@ -522,6 +570,39 @@
    "lat": "19.076",
    "lon": "72.8777",
    "time": "10:30"
+  }
+ },
+ "/v1/dasha/ashtottari": {
+  "status": 200,
+  "required": [
+   "date",
+   "tz",
+   "lat",
+   "lon"
+  ],
+  "params": {
+   "date": "1990-01-15",
+   "tz": "Asia/Kolkata",
+   "lat": "19.076",
+   "lon": "72.8777",
+   "time": "10:30"
+  }
+ },
+ "/v1/dasha/ashtottari/current": {
+  "status": 200,
+  "required": [
+   "date",
+   "tz",
+   "lat",
+   "lon"
+  ],
+  "params": {
+   "date": "1990-01-15",
+   "tz": "Asia/Kolkata",
+   "lat": "19.076",
+   "lon": "72.8777",
+   "time": "10:30",
+   "at": "2027-01-15T00:00:00Z"
   }
  },
  "/v1/dasha/char": {
@@ -1287,6 +1368,24 @@
    "birth.time": "10:30"
   }
  },
+ "/v1/muhurta/annaprashan": {
+  "status": 200,
+  "required": [
+   "date",
+   "tz",
+   "lat",
+   "lon"
+  ],
+  "params": {
+   "date": "2027-01-18",
+   "tz": "Asia/Kolkata",
+   "lat": "19.076",
+   "lon": "72.8777",
+   "time": "10:30",
+   "birth_date": "2026-07-20",
+   "sex": "male"
+  }
+ },
  "/v1/muhurta/best-time": {
   "status": 200,
   "required": [
@@ -1303,6 +1402,22 @@
    "lat": "28.6139",
    "lon": "77.209",
    "purpose": "vivah"
+  }
+ },
+ "/v1/muhurta/bhoomi-pujan": {
+  "status": 200,
+  "required": [
+   "date",
+   "tz",
+   "lat",
+   "lon"
+  ],
+  "params": {
+   "date": "2027-01-18",
+   "tz": "Asia/Kolkata",
+   "lat": "19.076",
+   "lon": "72.8777",
+   "time": "10:30"
   }
  },
  "/v1/muhurta/chandra-bala": {
@@ -1336,6 +1451,23 @@
    "lat": "28.6139",
    "lon": "77.209",
    "time": "10:00"
+  }
+ },
+ "/v1/muhurta/karnavedha": {
+  "status": 200,
+  "required": [
+   "date",
+   "tz",
+   "lat",
+   "lon"
+  ],
+  "params": {
+   "date": "2027-01-18",
+   "tz": "Asia/Kolkata",
+   "lat": "19.076",
+   "lon": "72.8777",
+   "time": "10:30",
+   "birth_date": "2026-07-20"
   }
  },
  "/v1/muhurta/naamkaran": {
@@ -1416,6 +1548,55 @@
    "lat": "28.6139",
    "lon": "77.209",
    "birth_nak": "3"
+  }
+ },
+ "/v1/muhurta/upanayan": {
+  "status": 200,
+  "required": [
+   "date",
+   "tz",
+   "lat",
+   "lon"
+  ],
+  "params": {
+   "date": "2027-01-18",
+   "tz": "Asia/Kolkata",
+   "lat": "19.076",
+   "lon": "72.8777",
+   "time": "10:30"
+  }
+ },
+ "/v1/muhurta/vahan": {
+  "status": 200,
+  "required": [
+   "date",
+   "tz",
+   "lat",
+   "lon"
+  ],
+  "params": {
+   "date": "2027-01-18",
+   "tz": "Asia/Kolkata",
+   "lat": "19.076",
+   "lon": "72.8777",
+   "time": "10:30"
+  }
+ },
+ "/v1/muhurta/vidyarambh": {
+  "status": 200,
+  "required": [
+   "date",
+   "tz",
+   "lat",
+   "lon"
+  ],
+  "params": {
+   "date": "2027-01-18",
+   "tz": "Asia/Kolkata",
+   "lat": "19.076",
+   "lon": "72.8777",
+   "time": "10:30",
+   "birth_date": "2022-01-10"
   }
  },
  "/v1/muhurta/vivah": {

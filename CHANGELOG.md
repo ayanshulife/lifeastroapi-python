@@ -1,5 +1,48 @@
 # Changelog
 
+## 1.1.0 — 2026-11-28
+
+New methods. Nothing changes for code written against 1.0.0. The install is the same and has no
+new dependency.
+
+- `dasha.ashtottari`: the full Ashtottari dasha (108-year cycle of 8 lords) with the balance at
+  birth and whether the chart meets the classical conditions. Options `depth` (1-3), `scheme`
+  (`28` default or `27`) and `antar_start` (`maha_lord` default or `next_lord`). 10 credits.
+- `dasha.ashtottari_current`: the Ashtottari mahadasha and antardasha running now, or at `at`.
+  Same options. 10 credits.
+- `chart.arudha_padas`: the twelve arudha padas (A1 to A12, with AL and UL) and how each was
+  counted. Options `exception` (`parashari` default or `none`), `scorpio_lord` (`mars` or `ketu`)
+  and `aquarius_lord` (`saturn` or `rahu`). 10 credits.
+- `chart.upapada`: the Upapada Lagna with its lord, the planets in it and the planets that aspect
+  it. Same options as `chart.arudha_padas`. 10 credits.
+- `chart.argala`: argala and its obstruction on every house, or on one `house`. Options
+  `include_eighth`, `node_reversal` (`ketu` default, `rahu_ketu` or `none`) and
+  `vipareeta_min_malefics` (default 3). 10 credits.
+- `muhurta.vahan`: score a moment for buying a vehicle or its first use. 20 credits.
+- `muhurta.bhoomi_pujan`: score a moment for ground-breaking or laying a foundation. 20 credits.
+- `muhurta.upanayan`: score a moment for the sacred thread ceremony. 20 credits.
+- `muhurta.annaprashan`: score a moment for a child's first solid food. Optional `birth_date` and
+  `sex` add a note on the child's age. 20 credits.
+- `muhurta.vidyarambh`: score a moment for a child's first letters. Optional `birth_date` adds an
+  age note. 20 credits.
+- `muhurta.karnavedha`: score a moment for ear piercing. Optional `birth_date` adds an age note.
+  20 credits.
+
+**Changes to existing methods** (all optional, nothing to change in your code):
+
+- `muhurta.best_time` takes the purposes `vyapar`, `yatra`, `vahan` and `bhoomi_pujan`, next to
+  `general`, `vivah`, `graha_pravesh` and `naamkaran`, and a new `direction` argument (N, NE, E,
+  SE, S, SW, W, NW) for `yatra`.
+- `muhurta.yatra` takes a `direction` argument. When you leave it out, the API no longer assumes
+  travel to the East: there is then no direction check.
+- Every muhurta score now has `prohibited_by` in its `result`: the classical prohibitions that
+  apply, as English ids such as `Bhadra`, `GuruShukraAsta` or `AdhikaMasa`. When the list is not
+  empty, `grade` is `inauspicious` and `is_acceptable` is false. `muhurta.best_time` never returns
+  a window under a prohibition, so it can return fewer windows than `top_n`.
+- `muhurta.upanayan`, `muhurta.annaprashan`, `muhurta.vidyarambh` and `muhurta.karnavedha` also
+  return `result.notes`: information such as the child's age by tradition or a festival on that
+  day. Notes never change the score.
+
 ## 1.0.0 — 2026-11-27
 
 This is the first stable release. From 1.0.0 on, a change that needs a code change on your side

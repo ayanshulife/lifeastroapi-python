@@ -17,6 +17,86 @@ class Dasha:
     def __init__(self, client: SyncCore) -> None:
         self._c = client
 
+    def ashtottari(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        date: str,
+        time: str,
+        tz: str,
+        ayanamsa: Ayanamsa | None = None,
+        house_system: HouseSystem | None = None,
+        depth: int | None = None,
+        scheme: int | None = None,
+        antar_start: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Full Ashtottari dasha tree (10 credits): the 108-year cycle of 8 lords from the Moon's
+        nakshatra at birth, with balance at birth and applicability (the Rahu and paksha
+        conditions, information only). depth: 1 mahadashas (default), 2 with antardashas, 3 with
+        pratyantardashas. scheme: 28 (default, with Abhijit) or 27. antar_start: `maha_lord`
+        (default) or `next_lord`.
+
+        Cost: 10 credits per call.
+
+        ``GET /v1/dasha/ashtottari``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "date", date)
+        put(_q, "time", time)
+        put(_q, "tz", tz)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "house_system", house_system)
+        put(_q, "depth", depth)
+        put(_q, "scheme", scheme)
+        put(_q, "antar_start", antar_start)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/dasha/ashtottari", _q, request_options=request_options)
+
+    def ashtottari_current(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        date: str,
+        time: str,
+        tz: str,
+        ayanamsa: Ayanamsa | None = None,
+        house_system: HouseSystem | None = None,
+        at: str | None = None,
+        scheme: int | None = None,
+        antar_start: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Ashtottari mahadasha and antardasha running at `at` (UTC, RFC 3339 or YYYY-MM-DD; now
+        when left out) (10 credits). Same scheme and antar_start options as dasha.ashtottari; a
+        moment outside the chart's 108 years is a 400 invalid_param.
+
+        Cost: 10 credits per call.
+
+        ``GET /v1/dasha/ashtottari/current``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "date", date)
+        put(_q, "time", time)
+        put(_q, "tz", tz)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "house_system", house_system)
+        put(_q, "at", at)
+        put(_q, "scheme", scheme)
+        put(_q, "antar_start", antar_start)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/dasha/ashtottari/current", _q, request_options=request_options)
+
     def char(
         self,
         *,
@@ -514,6 +594,88 @@ class AsyncDasha:
 
     def __init__(self, client: AsyncCore) -> None:
         self._c = client
+
+    async def ashtottari(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        date: str,
+        time: str,
+        tz: str,
+        ayanamsa: Ayanamsa | None = None,
+        house_system: HouseSystem | None = None,
+        depth: int | None = None,
+        scheme: int | None = None,
+        antar_start: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Full Ashtottari dasha tree (10 credits): the 108-year cycle of 8 lords from the Moon's
+        nakshatra at birth, with balance at birth and applicability (the Rahu and paksha
+        conditions, information only). depth: 1 mahadashas (default), 2 with antardashas, 3 with
+        pratyantardashas. scheme: 28 (default, with Abhijit) or 27. antar_start: `maha_lord`
+        (default) or `next_lord`.
+
+        Cost: 10 credits per call.
+
+        ``GET /v1/dasha/ashtottari``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "date", date)
+        put(_q, "time", time)
+        put(_q, "tz", tz)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "house_system", house_system)
+        put(_q, "depth", depth)
+        put(_q, "scheme", scheme)
+        put(_q, "antar_start", antar_start)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request("/v1/dasha/ashtottari", _q, request_options=request_options)
+
+    async def ashtottari_current(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        date: str,
+        time: str,
+        tz: str,
+        ayanamsa: Ayanamsa | None = None,
+        house_system: HouseSystem | None = None,
+        at: str | None = None,
+        scheme: int | None = None,
+        antar_start: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Ashtottari mahadasha and antardasha running at `at` (UTC, RFC 3339 or YYYY-MM-DD; now
+        when left out) (10 credits). Same scheme and antar_start options as dasha.ashtottari; a
+        moment outside the chart's 108 years is a 400 invalid_param.
+
+        Cost: 10 credits per call.
+
+        ``GET /v1/dasha/ashtottari/current``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "date", date)
+        put(_q, "time", time)
+        put(_q, "tz", tz)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "house_system", house_system)
+        put(_q, "at", at)
+        put(_q, "scheme", scheme)
+        put(_q, "antar_start", antar_start)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request(
+            "/v1/dasha/ashtottari/current", _q, request_options=request_options
+        )
 
     async def char(
         self,

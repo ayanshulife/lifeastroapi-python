@@ -22,6 +22,92 @@ class Chart:
     def __init__(self, client: SyncCore) -> None:
         self._c = client
 
+    def argala(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        date: str,
+        time: str,
+        tz: str,
+        ayanamsa: Ayanamsa | None = None,
+        house_system: HouseSystem | None = None,
+        house: int | None = None,
+        include_eighth: bool | None = None,
+        node_reversal: str | None = None,
+        vipareeta_min_malefics: int | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Argala and virodha argala on every house, or on one `house` (1-12) (10 credits): argala
+        from the 2nd, 4th, 11th and 5th, obstructed from the 12th, 10th, 3rd and 9th, each pair
+        with its grahas and a status (none, unobstructed, prevails, obstructed, tied), plus
+        vipareeta argala. include_eighth adds the 8th-place argala (default false);
+        node_reversal: `ketu` (default), `rahu_ketu` or `none`; vipareeta_min_malefics: malefics
+        in the 3rd needed for vipareeta argala (default 3). Display names follow `lang`; *_idx,
+        *_id and status values stay the same in every language.
+
+        Cost: 10 credits per call.
+
+        ``GET /v1/chart/argala``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "date", date)
+        put(_q, "time", time)
+        put(_q, "tz", tz)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "house_system", house_system)
+        put(_q, "house", house)
+        put(_q, "include_eighth", include_eighth)
+        put(_q, "node_reversal", node_reversal)
+        put(_q, "vipareeta_min_malefics", vipareeta_min_malefics)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/chart/argala", _q, request_options=request_options)
+
+    def arudha_padas(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        date: str,
+        time: str,
+        tz: str,
+        ayanamsa: Ayanamsa | None = None,
+        house_system: HouseSystem | None = None,
+        exception: str | None = None,
+        scorpio_lord: str | None = None,
+        aquarius_lord: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Arudha padas A1 to A12 with the working (10 credits): bhava sign, lord and its sign,
+        count, exception_applied and the arudha sign and house (A1 is also AL, A12 also UL).
+        exception: `parashari` (default) or `none`; scorpio_lord: `mars` (default) or `ketu`;
+        aquarius_lord: `saturn` (default) or `rahu`. Display names follow `lang`; *_idx, *_id and
+        status values stay the same in every language.
+
+        Cost: 10 credits per call.
+
+        ``GET /v1/chart/arudha-padas``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "date", date)
+        put(_q, "time", time)
+        put(_q, "tz", tz)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "house_system", house_system)
+        put(_q, "exception", exception)
+        put(_q, "scorpio_lord", scorpio_lord)
+        put(_q, "aquarius_lord", aquarius_lord)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/chart/arudha-padas", _q, request_options=request_options)
+
     def ascendant(
         self,
         *,
@@ -863,6 +949,47 @@ class Chart:
             request_options=request_options,
         )
 
+    def upapada(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        date: str,
+        time: str,
+        tz: str,
+        ayanamsa: Ayanamsa | None = None,
+        house_system: HouseSystem | None = None,
+        exception: str | None = None,
+        scorpio_lord: str | None = None,
+        aquarius_lord: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Upapada Lagna (UL, the arudha of the 12th house) (10 credits): the A12 working, the UL
+        sign and house, its lord with sign, house and place from the UL, occupants, graha drishti
+        and rashi drishti on it. Facts only, no judgement. Same options as chart.arudha_padas.
+        Display names follow `lang`; *_idx, *_id and status values stay the same in every
+        language.
+
+        Cost: 10 credits per call.
+
+        ``GET /v1/chart/upapada``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "date", date)
+        put(_q, "time", time)
+        put(_q, "tz", tz)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "house_system", house_system)
+        put(_q, "exception", exception)
+        put(_q, "scorpio_lord", scorpio_lord)
+        put(_q, "aquarius_lord", aquarius_lord)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return self._c.request("/v1/chart/upapada", _q, request_options=request_options)
+
     def yogas(
         self,
         *,
@@ -909,6 +1036,92 @@ class AsyncChart:
 
     def __init__(self, client: AsyncCore) -> None:
         self._c = client
+
+    async def argala(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        date: str,
+        time: str,
+        tz: str,
+        ayanamsa: Ayanamsa | None = None,
+        house_system: HouseSystem | None = None,
+        house: int | None = None,
+        include_eighth: bool | None = None,
+        node_reversal: str | None = None,
+        vipareeta_min_malefics: int | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Argala and virodha argala on every house, or on one `house` (1-12) (10 credits): argala
+        from the 2nd, 4th, 11th and 5th, obstructed from the 12th, 10th, 3rd and 9th, each pair
+        with its grahas and a status (none, unobstructed, prevails, obstructed, tied), plus
+        vipareeta argala. include_eighth adds the 8th-place argala (default false);
+        node_reversal: `ketu` (default), `rahu_ketu` or `none`; vipareeta_min_malefics: malefics
+        in the 3rd needed for vipareeta argala (default 3). Display names follow `lang`; *_idx,
+        *_id and status values stay the same in every language.
+
+        Cost: 10 credits per call.
+
+        ``GET /v1/chart/argala``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "date", date)
+        put(_q, "time", time)
+        put(_q, "tz", tz)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "house_system", house_system)
+        put(_q, "house", house)
+        put(_q, "include_eighth", include_eighth)
+        put(_q, "node_reversal", node_reversal)
+        put(_q, "vipareeta_min_malefics", vipareeta_min_malefics)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request("/v1/chart/argala", _q, request_options=request_options)
+
+    async def arudha_padas(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        date: str,
+        time: str,
+        tz: str,
+        ayanamsa: Ayanamsa | None = None,
+        house_system: HouseSystem | None = None,
+        exception: str | None = None,
+        scorpio_lord: str | None = None,
+        aquarius_lord: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Arudha padas A1 to A12 with the working (10 credits): bhava sign, lord and its sign,
+        count, exception_applied and the arudha sign and house (A1 is also AL, A12 also UL).
+        exception: `parashari` (default) or `none`; scorpio_lord: `mars` (default) or `ketu`;
+        aquarius_lord: `saturn` (default) or `rahu`. Display names follow `lang`; *_idx, *_id and
+        status values stay the same in every language.
+
+        Cost: 10 credits per call.
+
+        ``GET /v1/chart/arudha-padas``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "date", date)
+        put(_q, "time", time)
+        put(_q, "tz", tz)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "house_system", house_system)
+        put(_q, "exception", exception)
+        put(_q, "scorpio_lord", scorpio_lord)
+        put(_q, "aquarius_lord", aquarius_lord)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request("/v1/chart/arudha-padas", _q, request_options=request_options)
 
     async def ascendant(
         self,
@@ -1752,6 +1965,47 @@ class AsyncChart:
             _q,
             request_options=request_options,
         )
+
+    async def upapada(
+        self,
+        *,
+        lat: float,
+        lon: float,
+        date: str,
+        time: str,
+        tz: str,
+        ayanamsa: Ayanamsa | None = None,
+        house_system: HouseSystem | None = None,
+        exception: str | None = None,
+        scorpio_lord: str | None = None,
+        aquarius_lord: str | None = None,
+        lang: Locale | None = None,
+        request_options: RequestOptions | None = None,
+    ) -> Any:
+        """Upapada Lagna (UL, the arudha of the 12th house) (10 credits): the A12 working, the UL
+        sign and house, its lord with sign, house and place from the UL, occupants, graha drishti
+        and rashi drishti on it. Facts only, no judgement. Same options as chart.arudha_padas.
+        Display names follow `lang`; *_idx, *_id and status values stay the same in every
+        language.
+
+        Cost: 10 credits per call.
+
+        ``GET /v1/chart/upapada``
+        """
+        _q: QueryParams = {}
+        put(_q, "lat", lat)
+        put(_q, "lon", lon)
+        put(_q, "date", date)
+        put(_q, "time", time)
+        put(_q, "tz", tz)
+        put(_q, "ayanamsa", ayanamsa)
+        put(_q, "house_system", house_system)
+        put(_q, "exception", exception)
+        put(_q, "scorpio_lord", scorpio_lord)
+        put(_q, "aquarius_lord", aquarius_lord)
+        put(_q, "lang", lang)
+        put(_q, "locale", lang)
+        return await self._c.request("/v1/chart/upapada", _q, request_options=request_options)
 
     async def yogas(
         self,

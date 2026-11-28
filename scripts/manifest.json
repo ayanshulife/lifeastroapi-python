@@ -743,6 +743,316 @@
   ]
  },
  {
+  "key": "chart.argala",
+  "py": "chart.argala",
+  "path": "/v1/chart/argala",
+  "shape": "birth",
+  "cost": 10,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "house",
+    "type": "integer",
+    "required": false,
+    "field": "house"
+   },
+   {
+    "wire": "include_eighth",
+    "type": "boolean",
+    "required": false,
+    "field": "includeEighth"
+   },
+   {
+    "wire": "node_reversal",
+    "type": "string",
+    "required": false,
+    "field": "nodeReversal"
+   },
+   {
+    "wire": "vipareeta_min_malefics",
+    "type": "integer",
+    "required": false,
+    "field": "vipareetaMinMalefics"
+   },
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "time"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "house_system",
+    "node": "houseSystem",
+    "type": "HouseSystem",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "house_system"
+    ]
+   },
+   {
+    "name": "house",
+    "node": "house",
+    "type": "int",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "house"
+    ]
+   },
+   {
+    "name": "include_eighth",
+    "node": "includeEighth",
+    "type": "bool",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "include_eighth"
+    ]
+   },
+   {
+    "name": "node_reversal",
+    "node": "nodeReversal",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "node_reversal"
+    ]
+   },
+   {
+    "name": "vipareeta_min_malefics",
+    "node": "vipareetaMinMalefics",
+    "type": "int",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "vipareeta_min_malefics"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
+    ]
+   }
+  ]
+ },
+ {
+  "key": "chart.arudhaPadas",
+  "py": "chart.arudha_padas",
+  "path": "/v1/chart/arudha-padas",
+  "shape": "birth",
+  "cost": 10,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "exception",
+    "type": "string",
+    "required": false,
+    "field": "exception"
+   },
+   {
+    "wire": "scorpio_lord",
+    "type": "string",
+    "required": false,
+    "field": "scorpioLord"
+   },
+   {
+    "wire": "aquarius_lord",
+    "type": "string",
+    "required": false,
+    "field": "aquariusLord"
+   },
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "time"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "house_system",
+    "node": "houseSystem",
+    "type": "HouseSystem",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "house_system"
+    ]
+   },
+   {
+    "name": "exception",
+    "node": "exception",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "exception"
+    ]
+   },
+   {
+    "name": "scorpio_lord",
+    "node": "scorpioLord",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "scorpio_lord"
+    ]
+   },
+   {
+    "name": "aquarius_lord",
+    "node": "aquariusLord",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "aquarius_lord"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
+    ]
+   }
+  ]
+ },
+ {
   "key": "chart.ascendant",
   "py": "chart.ascendant",
   "path": "/v1/chart/ascendant",
@@ -3366,6 +3676,153 @@
   ]
  },
  {
+  "key": "chart.upapada",
+  "py": "chart.upapada",
+  "path": "/v1/chart/upapada",
+  "shape": "birth",
+  "cost": 10,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "exception",
+    "type": "string",
+    "required": false,
+    "field": "exception"
+   },
+   {
+    "wire": "scorpio_lord",
+    "type": "string",
+    "required": false,
+    "field": "scorpioLord"
+   },
+   {
+    "wire": "aquarius_lord",
+    "type": "string",
+    "required": false,
+    "field": "aquariusLord"
+   },
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "time"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "house_system",
+    "node": "houseSystem",
+    "type": "HouseSystem",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "house_system"
+    ]
+   },
+   {
+    "name": "exception",
+    "node": "exception",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "exception"
+    ]
+   },
+   {
+    "name": "scorpio_lord",
+    "node": "scorpioLord",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "scorpio_lord"
+    ]
+   },
+   {
+    "name": "aquarius_lord",
+    "node": "aquariusLord",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "aquarius_lord"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
+    ]
+   }
+  ]
+ },
+ {
   "key": "chart.yogas",
   "py": "chart.yogas",
   "path": "/v1/chart/yogas",
@@ -3475,6 +3932,300 @@
     "kind": "scalar",
     "wires": [
      "gender"
+    ]
+   }
+  ]
+ },
+ {
+  "key": "dasha.ashtottari",
+  "py": "dasha.ashtottari",
+  "path": "/v1/dasha/ashtottari",
+  "shape": "birth",
+  "cost": 10,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "depth",
+    "type": "integer",
+    "required": false,
+    "field": "depth"
+   },
+   {
+    "wire": "scheme",
+    "type": "integer",
+    "required": false,
+    "field": "scheme"
+   },
+   {
+    "wire": "antar_start",
+    "type": "string",
+    "required": false,
+    "field": "antarStart"
+   },
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "time"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "house_system",
+    "node": "houseSystem",
+    "type": "HouseSystem",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "house_system"
+    ]
+   },
+   {
+    "name": "depth",
+    "node": "depth",
+    "type": "int",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "depth"
+    ]
+   },
+   {
+    "name": "scheme",
+    "node": "scheme",
+    "type": "int",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "scheme"
+    ]
+   },
+   {
+    "name": "antar_start",
+    "node": "antarStart",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "antar_start"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
+    ]
+   }
+  ]
+ },
+ {
+  "key": "dasha.ashtottariCurrent",
+  "py": "dasha.ashtottari_current",
+  "path": "/v1/dasha/ashtottari/current",
+  "shape": "birth",
+  "cost": 10,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "at",
+    "type": "string",
+    "required": false,
+    "field": "at"
+   },
+   {
+    "wire": "scheme",
+    "type": "integer",
+    "required": false,
+    "field": "scheme"
+   },
+   {
+    "wire": "antar_start",
+    "type": "string",
+    "required": false,
+    "field": "antarStart"
+   },
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "time"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "house_system",
+    "node": "houseSystem",
+    "type": "HouseSystem",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "house_system"
+    ]
+   },
+   {
+    "name": "at",
+    "node": "at",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "at"
+    ]
+   },
+   {
+    "name": "scheme",
+    "node": "scheme",
+    "type": "int",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "scheme"
+    ]
+   },
+   {
+    "name": "antar_start",
+    "node": "antarStart",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "antar_start"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
     ]
    }
   ]
@@ -7877,6 +8628,127 @@
   ]
  },
  {
+  "key": "muhurta.annaprashan",
+  "py": "muhurta.annaprashan",
+  "path": "/v1/muhurta/annaprashan",
+  "shape": "moment",
+  "cost": 20,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "birth_date",
+    "type": "string",
+    "required": false,
+    "field": "birthDate"
+   },
+   {
+    "wire": "sex",
+    "type": "string",
+    "required": false,
+    "field": "sex"
+   },
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "time"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "birth_date",
+    "node": "birthDate",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "birth_date"
+    ]
+   },
+   {
+    "name": "sex",
+    "node": "sex",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "sex"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
+    ]
+   }
+  ]
+ },
+ {
   "key": "muhurta.bestTime",
   "py": "muhurta.best_time",
   "path": "/v1/muhurta/best-time",
@@ -7907,6 +8779,12 @@
     "type": "string",
     "required": false,
     "field": "ayanamsa"
+   },
+   {
+    "wire": "direction",
+    "type": "string",
+    "required": false,
+    "field": "direction"
    },
    {
     "wire": "lang",
@@ -7994,6 +8872,105 @@
     "kind": "scalar",
     "wires": [
      "birth_date"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "direction",
+    "node": "direction",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "direction"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
+    ]
+   }
+  ]
+ },
+ {
+  "key": "muhurta.bhoomiPujan",
+  "py": "muhurta.bhoomi_pujan",
+  "path": "/v1/muhurta/bhoomi-pujan",
+  "shape": "moment",
+  "cost": 20,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "time"
     ]
    },
    {
@@ -8191,6 +9168,111 @@
     "kind": "scalar",
     "wires": [
      "ayanamsa"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
+    ]
+   }
+  ]
+ },
+ {
+  "key": "muhurta.karnavedha",
+  "py": "muhurta.karnavedha",
+  "path": "/v1/muhurta/karnavedha",
+  "shape": "moment",
+  "cost": 20,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "birth_date",
+    "type": "string",
+    "required": false,
+    "field": "birthDate"
+   },
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "time"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "birth_date",
+    "node": "birthDate",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "birth_date"
     ]
    },
    {
@@ -8677,6 +9759,289 @@
   ]
  },
  {
+  "key": "muhurta.upanayan",
+  "py": "muhurta.upanayan",
+  "path": "/v1/muhurta/upanayan",
+  "shape": "moment",
+  "cost": 20,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "time"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
+    ]
+   }
+  ]
+ },
+ {
+  "key": "muhurta.vahan",
+  "py": "muhurta.vahan",
+  "path": "/v1/muhurta/vahan",
+  "shape": "moment",
+  "cost": 20,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "time"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
+    ]
+   }
+  ]
+ },
+ {
+  "key": "muhurta.vidyarambh",
+  "py": "muhurta.vidyarambh",
+  "path": "/v1/muhurta/vidyarambh",
+  "shape": "moment",
+  "cost": 20,
+  "pathParams": [],
+  "extras": [
+   {
+    "wire": "birth_date",
+    "type": "string",
+    "required": false,
+    "field": "birthDate"
+   },
+   {
+    "wire": "lang",
+    "type": "locale",
+    "required": false,
+    "field": "lang"
+   }
+  ],
+  "params": [
+   {
+    "name": "lat",
+    "node": "lat",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lat"
+    ]
+   },
+   {
+    "name": "lon",
+    "node": "lon",
+    "type": "float",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "lon"
+    ]
+   },
+   {
+    "name": "tz",
+    "node": "tz",
+    "type": "str",
+    "required": true,
+    "kind": "scalar",
+    "wires": [
+     "tz"
+    ]
+   },
+   {
+    "name": "date",
+    "node": "date",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "date"
+    ]
+   },
+   {
+    "name": "time",
+    "node": "time",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "time"
+    ]
+   },
+   {
+    "name": "ayanamsa",
+    "node": "ayanamsa",
+    "type": "Ayanamsa",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "ayanamsa"
+    ]
+   },
+   {
+    "name": "birth_date",
+    "node": "birthDate",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "birth_date"
+    ]
+   },
+   {
+    "name": "lang",
+    "node": "lang",
+    "type": "Locale",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "lang",
+     "locale"
+    ]
+   }
+  ]
+ },
+ {
   "key": "muhurta.vivah",
   "py": "muhurta.vivah",
   "path": "/v1/muhurta/vivah",
@@ -8863,6 +10228,12 @@
   "pathParams": [],
   "extras": [
    {
+    "wire": "direction",
+    "type": "string",
+    "required": false,
+    "field": "direction"
+   },
+   {
     "wire": "lang",
     "type": "locale",
     "required": false,
@@ -8928,6 +10299,16 @@
     "kind": "scalar",
     "wires": [
      "ayanamsa"
+    ]
+   },
+   {
+    "name": "direction",
+    "node": "direction",
+    "type": "str",
+    "required": false,
+    "kind": "scalar",
+    "wires": [
+     "direction"
     ]
    },
    {
